@@ -1,7 +1,13 @@
+#include <DHT22.h>
 #include <I2C.h>
 #include <Wire.h>
 #include <Sensor.h>
 #include <aJSON.h>
+#include <stdio.h>
+
+#define DHT22_PIN 15
+
+
 
 int IDPinCon1 = A3;
 int IDPinCon2 = A6;
@@ -204,6 +210,9 @@ void getAccXYZ(int *x, int *y, int *z, bool isHighRes=true)
  
 Sensor sen;
 
+// Setup a DHT22 instance
+DHT22 myDHT22(DHT22_PIN);
+
 void setup()
 {
   I2c.begin();
@@ -218,7 +227,7 @@ void setup()
   byte b;
   regRead(REG_WHO_AM_I, &b);
   //Serial.print("WHO_AM_I=");
-  //Serial.println(b,HEX);
+  ////Serial.println(b,HEX);
 }
 
 
@@ -229,10 +238,10 @@ void testObjects() {
 
   aJsonObject* root = aJson.createObject();
   if (root != NULL) {
-    printProgStr( OBJECT_CREATE_STRING);
+    //printProgStr( OBJECT_CREATE_STRING);
   } 
   else {
-    printProgStr( OBJECT_CREATION_FAILED_STRING);
+    //printProgStr( OBJECT_CREATION_FAILED_STRING);
     return;
   }
   //printProgStr( ADDING_NAME_STRING);
@@ -298,20 +307,20 @@ if (ports != NULL){
   //  return;
   //}
 
-  freeMem("with object");
+  //freeMem("with object");
   //printProgStr( RESULT_PRINTING_STRING);
   char* string = aJson.print(root);
   if (string != NULL) {
     Serial.println(string);
   } 
   else {
-    printProgStr( OUTPUT_STRING_ERROR);
+    //printProgStr( OUTPUT_STRING_ERROR);
   }
 
-  printProgStr( DELETING_OBJECT_STRING);
+  //printProgStr( DELETING_OBJECT_STRING);
   aJson.deleteItem(root);
   free(string);
-  freeMem("after deletion");
+  //freeMem("after deletion");
 }
 
 void loop()
@@ -325,9 +334,9 @@ void loop()
 	//aJson.addNumberToObject(fmt,"height",		1080);
 	//aJson.addFalseToObject (fmt,"interlace");
 	//aJson.addNumberToObject(fmt,"frame rate",	24);
-	//Serial.println(aJson.print(root));
+	////Serial.println(aJson.print(root));
 	//aJson.deleteItem(root);
-	//freeMem("the memory: ");
+	////freeMem("the memory: ");
 	delay(10);
 	
   testObjects();
@@ -342,13 +351,63 @@ void loop()
  //Serial.print("}},{\"temperature\":");
  
  //Serial.print(sen.getTemperature());
- //Serial.println("0}]}");
+ ////Serial.println("0}]}");
 
  //char* sensorType = sen.idTheType(analogRead(IDPinCon1));
  //   int senval1 = sen.getSensorValue(1, sensorType);
  //   Serial.print("-------------->");
- //   Serial.println(senval1);
+ //   //Serial.println(senval1);
+ DHT22_ERROR_t errorCode;
 
+  // The sensor can only be read from every 1-2s, and requires a minimum
+  // 2s warm-up after power-on.
+  delay(2000);
+
+  Serial.print("Requesting data...");
+  errorCode = myDHT22.readData();
+  switch(errorCode)
+  {
+    case DHT_ERROR_NONE:
+      Serial.print("Got Data ");
+      Serial.print(myDHT22.getTemperatureC());
+      Serial.print("C ");
+      Serial.print(myDHT22.getHumidity());
+      Serial.println("%");
+      // Alternately, with integer formatting which is clumsier but more compact to store and
+	  // can be compared reliably for equality:
+	  //	  
+      char buf[128];
+      sprintf(buf, "Integer-only reading: Temperature %hi.%01hi C, Humidity %i.%01i %% RH",
+                   myDHT22.getTemperatureCInt()/10, abs(myDHT22.getTemperatureCInt()%10),
+                   myDHT22.getHumidityInt()/10, myDHT22.getHumidityInt()%10);
+      Serial.println(buf);
+      break;
+    case DHT_ERROR_CHECKSUM:
+      Serial.print("check sum error ");
+      Serial.print(myDHT22.getTemperatureC());
+      Serial.print("C ");
+      Serial.print(myDHT22.getHumidity());
+      Serial.println("%");
+      break;
+    case DHT_BUS_HUNG:
+      Serial.println("BUS Hung ");
+      break;
+    case DHT_ERROR_NOT_PRESENT:
+      Serial.println("Not Present ");
+      break;
+    case DHT_ERROR_ACK_TOO_LONG:
+      Serial.println("ACK time out ");
+      break;
+    case DHT_ERROR_SYNC_TIMEOUT:
+      Serial.println("Sync Timeout ");
+      break;
+    case DHT_ERROR_DATA_TIMEOUT:
+      Serial.println("Data Timeout ");
+      break;
+    case DHT_ERROR_TOOQUICK:
+      Serial.println("Polled to quick ");
+      break;
+  }
 }
 
 //Code to print out the free memory

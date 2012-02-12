@@ -17,23 +17,26 @@ Sensor::Sensor()
 char* Sensor::idTheType(int sensorValue)
 {
 	char* sensorType;
-	if (sensorValue > 175 && sensorValue < 190) { // Distance
+	if (sensorValue > 177 && sensorValue < 190) { // Distance (ideal )
 		sensorType = "DISTANCE";
 		return sensorType;
-	} else if (sensorValue > 505 && sensorValue < 516) { // Humidity
+	} else if (sensorValue > 496 && sensorValue < 527) { // Humidity
 		sensorType = "HUMIDITY";
 		return sensorType;
-	} else if (sensorValue > 248 && sensorValue < 258) { // PIR
+	} else if (sensorValue > 246 && sensorValue < 261) { // PIR
 		sensorType = "PIR";
 		return sensorType;
-	} else if (sensorValue > 362 && sensorValue < 371) { // Light
+	} else if (sensorValue > 355 && sensorValue < 378) { // Light
 		sensorType = "LIGHT";
 		return sensorType;
-	} else if (sensorValue > 780 && sensorValue < 790) { // Button
+	} else if (sensorValue > 761 && sensorValue < 808) { // Button
 		sensorType = "BUTTON";
 		return sensorType;
 	} else {
 		sensorType = "UNKNOWN";
+		Serial.print("bad reading: ");
+		Serial.println(sensorValue);
+		
 		return sensorType;
 	}
 }
@@ -72,10 +75,10 @@ int Sensor::getSensorValue(int port, char* type)
 	
 	
 	else{
-		Serial.println("--> ERROR");
+		//Serial.println("--> ERROR");
 		Serial.print("--> Attempting to assign port: ");
-		Serial.println(port);
-		Serial.println("--> Port can only be 1, 2 or 3");
+		//Serial.println(port);
+		//Serial.println("--> Port can only be 1, 2 or 3");
 		//break;	
 	}
 	
@@ -91,6 +94,12 @@ int Sensor::getSensorValue(int port, char* type)
 		int sensorValue = analogRead(aInPin);
 		return sensorValue;
 	}
+	else if(type == "HUMIDITY"){
+		 
+		return 0;
+	
+		
+	}
 	else if(type == "BUTTON"){
 		pinMode(dInPin, INPUT);
 		int sensorValue = digitalRead(dInPin);
@@ -98,9 +107,9 @@ int Sensor::getSensorValue(int port, char* type)
 	}
 	else{
 		//int sensorValue = analogRead(aInPin);
-		Serial.print("returning 0 because type is ->");
-		Serial.print(type);
-		Serial.println("<-");
+		//Serial.print("returning 0 because type is ->");
+		//Serial.print(type);
+		//Serial.println("<-");
 		return 0;
 	}
 }
@@ -121,7 +130,7 @@ float Sensor::getTemperature()
 
 void Sensor::dot()
 {
-	Serial.println("dot");
+	//Serial.println("dot");
   //digitalWrite(_pin, HIGH);
   //delay(250);
   //digitalWrite(_pin, LOW);
@@ -130,7 +139,7 @@ void Sensor::dot()
 
 void Sensor::dash()
 {
-	Serial.println("dash");  
+	//Serial.println("dash");  
 	//digitalWrite(_pin, HIGH);
   //delay(1000);
   //digitalWrite(_pin, LOW);
