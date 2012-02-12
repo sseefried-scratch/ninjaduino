@@ -220,6 +220,10 @@ void setup()
   //Serial.print("WHO_AM_I=");
   //Serial.println(b,HEX);
 }
+
+
+
+
 int x = 0, y = 0, z = 0;
 void testObjects() {
 
@@ -231,10 +235,48 @@ void testObjects() {
     printProgStr( OBJECT_CREATION_FAILED_STRING);
     return;
   }
-  printProgStr( ADDING_NAME_STRING);
-  aJson.addItemToObject(root, "temperature", aJson.createItem(sen.getTemperature()));
-  printProgStr( CREATING_FROMAT_STRING);
-  aJsonObject* ports = aJson.createObject();
+  //printProgStr( ADDING_NAME_STRING);
+  //aJson.addItemToObject(root, "temperature", aJson.createItem(sen.getTemperature()));
+  aJson.addNumberToObject(root, "temperature", sen.getTemperature());
+  //printProgStr( CREATING_FROMAT_STRING);
+  aJsonObject* accelerometer = aJson.createObject();
+  if (accelerometer != NULL){
+	int x = 0, y = 0, z = 0;
+
+	getAccXYZ(&x, &y, &z); //get accelerometer readings in normal mode (hi res).
+	aJson.addItemToObject(root, "accelerometer", accelerometer);
+	aJson.addNumberToObject(accelerometer, "x", x);
+	aJson.addNumberToObject(accelerometer, "y", y);
+	aJson.addNumberToObject(accelerometer, "z", z);
+  }
+ else {
+   printProgStr( FORMAT_FAILED_STRING);
+   return;
+ }
+ aJsonObject* ports = aJson.createObject();
+if (ports != NULL){
+	
+	aJson.addItemToObject(root, "ports", ports);
+	aJsonObject* port1 = aJson.createObject();
+	aJsonObject* port2 = aJson.createObject();
+	aJsonObject* port3 = aJson.createObject();
+	
+	aJson.addItemToObject(ports, "port1", port1);
+	aJson.addItemToObject(port1, "type", aJson.createItem(sen.idTheType(analogRead(IDPinCon1))));
+	aJson.addItemToObject(port1, "value", aJson.createItem(sen.getSensorValue(1, sen.idTheType(analogRead(IDPinCon1)))));
+	aJson.addItemToObject(ports, "port2", port2);
+	aJson.addItemToObject(port2, "type", aJson.createItem(sen.idTheType(analogRead(IDPinCon2))));
+	aJson.addItemToObject(port2, "value", aJson.createItem(sen.getSensorValue(2, sen.idTheType(analogRead(IDPinCon2)))));
+	aJson.addItemToObject(ports, "port3", port3);
+	aJson.addItemToObject(port3, "type", aJson.createItem(sen.idTheType(analogRead(IDPinCon3))));
+	aJson.addItemToObject(port3, "value", aJson.createItem(sen.getSensorValue(3, sen.idTheType(analogRead(IDPinCon3)))));
+	
+
+  }
+ else {
+   printProgStr( FORMAT_FAILED_STRING);
+   return;
+ }
   //if (fmt != NULL) {
   //  printProgStr( ADDING_FORMAT_STRING);
   //  aJson.addItemToObject(root, "format", fmt);
@@ -257,7 +299,7 @@ void testObjects() {
   //}
 
   freeMem("with object");
-  printProgStr( RESULT_PRINTING_STRING);
+  //printProgStr( RESULT_PRINTING_STRING);
   char* string = aJson.print(root);
   if (string != NULL) {
     Serial.println(string);
@@ -286,7 +328,7 @@ void loop()
 	//Serial.println(aJson.print(root));
 	//aJson.deleteItem(root);
 	//freeMem("the memory: ");
-	delay(100);
+	delay(10);
 	
   testObjects();
 

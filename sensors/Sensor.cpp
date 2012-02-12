@@ -42,6 +42,7 @@ char* Sensor::idTheType(int sensorValue)
 int Sensor::getSensorValue(int port, char* type)
 {
 	int aInPin;
+	int dInPin;
 	
 	if(port == 1){
 		aInPin = A0;
@@ -55,6 +56,21 @@ int Sensor::getSensorValue(int port, char* type)
 	{
 		aInPin = A2;
 	}
+	
+	if(port == 1){
+		dInPin = 14;
+	}
+	else if (port == 2)
+	{
+		dInPin = 15;
+		
+	}
+	else if (port == 3)
+	{
+		dInPin = 16;
+	}
+	
+	
 	else{
 		Serial.println("--> ERROR");
 		Serial.print("--> Attempting to assign port: ");
@@ -67,8 +83,24 @@ int Sensor::getSensorValue(int port, char* type)
 		int sensorValue = analogRead(aInPin);
 		return sensorValue;
 	}
+	else if(type == "BUTTON"){
+		int sensorValue = analogRead(aInPin);
+		return sensorValue;
+	}
+	else if(type == "DISTANCE"){
+		int sensorValue = analogRead(aInPin);
+		return sensorValue;
+	}
+	else if(type == "BUTTON"){
+		pinMode(dInPin, INPUT);
+		int sensorValue = digitalRead(dInPin);
+		return sensorValue;
+	}
 	else{
 		//int sensorValue = analogRead(aInPin);
+		Serial.print("returning 0 because type is ->");
+		Serial.print(type);
+		Serial.println("<-");
 		return 0;
 	}
 }
