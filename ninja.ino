@@ -218,7 +218,7 @@ void setup()
 {
   I2c.begin();
   Serial.begin(9600);
- 
+  Serial.println("beginning...");
   standbyMode(); //register settings must be made in standby mode
   regWrite(REG_XYZ_DATA_CFG, FULL_SCALE_RANGE_2g);
   hiResMode(); //this is the default setting and can be omitted.
@@ -314,7 +314,7 @@ if (ports != NULL){
   //  return;
   //}
 
-  //freeMem("with object");
+  freeMem("with object");
   //printProgStr( RESULT_PRINTING_STRING);
   char* string = aJson.print(root);
   if (string != NULL) {
@@ -325,6 +325,8 @@ if (ports != NULL){
   }
 
   //printProgStr( DELETING_OBJECT_STRING);
+  aJson.deleteItem(ports);
+
   aJson.deleteItem(root);
   free(string);
   //freeMem("after deletion");
@@ -478,23 +480,23 @@ void printProgStr(const prog_char* str) {
   }
 }
 
-int analogNoiseReducedRead(int pinNumber)
-{
-  int reading;
-  
-  ADCSRA |= _BV( ADIE );             //Set ADC interrupt
-  set_sleep_mode(SLEEP_MODE_ADC);    //Set sleep mode
-  reading = analogRead(pinNumber);   //Start reading
-  sleep_enable();                    //Enable sleep
-  do
-  {                                  //Loop until reading is completed
-    sei();                           //Enable interrupts
-    sleep_mode();                    //Go to sleep
-    cli();                           //Disable interrupts
-  } while(((ADCSRA&(1<<ADSC))!= 0)); //Loop if the interrupt that woke the cpu was something other than the ADC finishing the reading
-  sleep_disable();                   //Disable sleep
-  ADCSRA &= ~ _BV( ADIE );           //Clear ADC interupt
-  sei();                             //Enable interrupts
-  
-  return(reading);
-}
+//int analogNoiseReducedRead(int pinNumber)
+//{
+//  int reading;
+//reading = analogRead(IDPinCon3);
+// // ADCSRA |= _BV( ADIE );             //Set ADC interrupt
+// // set_sleep_mode(SLEEP_MODE_ADC);    //Set sleep mode
+// // reading = analogRead(pinNumber);   //Start reading
+// // sleep_enable();                    //Enable sleep
+// // do
+// // {                                  //Loop until reading is completed
+// //   sei();                           //Enable interrupts
+// //   sleep_mode();                    //Go to sleep
+// //   cli();                           //Disable interrupts
+// // } while(((ADCSRA&(1<<ADSC))!= 0)); //Loop if the interrupt that woke the cpu was something other than the ADC finishing the reading
+// // sleep_disable();                   //Disable sleep
+// // ADCSRA &= ~ _BV( ADIE );           //Clear ADC interupt
+// // sei();                             //Enable interrupts
+//  
+//  return(reading);
+//}
