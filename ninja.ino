@@ -4,6 +4,7 @@
 #include <Sensor.h>
 #include <aJSON.h>
 #include <stdio.h>
+#include <avr/sleep.h>
 
 #define DHT22_PIN 15
 
@@ -265,20 +266,26 @@ void testObjects() {
  aJsonObject* ports = aJson.createObject();
 if (ports != NULL){
 	
+	//aJson.createArray(root, "ports", ports);
+	aJsonObject* ports = aJson.createArray();
 	aJson.addItemToObject(root, "ports", ports);
+	
 	aJsonObject* port1 = aJson.createObject();
 	aJsonObject* port2 = aJson.createObject();
 	aJsonObject* port3 = aJson.createObject();
 	
-	aJson.addItemToObject(ports, "port1", port1);
-	aJson.addItemToObject(port1, "type", aJson.createItem(sen.idTheType(analogRead(IDPinCon1))));
-	aJson.addItemToObject(port1, "value", aJson.createItem(sen.getSensorValue(1, sen.idTheType(analogRead(IDPinCon1)))));
-	aJson.addItemToObject(ports, "port2", port2);
-	aJson.addItemToObject(port2, "type", aJson.createItem(sen.idTheType(analogRead(IDPinCon2))));
-	aJson.addItemToObject(port2, "value", aJson.createItem(sen.getSensorValue(2, sen.idTheType(analogRead(IDPinCon2)))));
-	aJson.addItemToObject(ports, "port3", port3);
-	aJson.addItemToObject(port3, "type", aJson.createItem(sen.idTheType(analogRead(IDPinCon3))));
-	aJson.addItemToObject(port3, "value", aJson.createItem(sen.getSensorValue(3, sen.idTheType(analogRead(IDPinCon3)))));
+	aJson.addItemToArray(ports, port1);
+	aJson.addItemToObject(port1, "port", aJson.createItem(1));
+	aJson.addItemToObject(port1, "type", aJson.createItem(sen.idTheType(analogRead(IDPinCon1), false)));
+	aJson.addItemToObject(port1, "value", aJson.createItem(sen.getSensorValue(1, sen.idTheType(analogRead(IDPinCon1), false))));
+	aJson.addItemToArray(ports, port2);
+	aJson.addItemToObject(port2, "port", aJson.createItem(2));
+	aJson.addItemToObject(port2, "type", aJson.createItem(sen.idTheType(analogRead(IDPinCon2), false)));
+	aJson.addItemToObject(port2, "value", aJson.createItem(sen.getSensorValue(2, sen.idTheType(analogRead(IDPinCon2), true))));
+	aJson.addItemToArray(ports, port3);
+	aJson.addItemToObject(port3, "port", aJson.createItem(3));
+	aJson.addItemToObject(port3, "type", aJson.createItem(sen.idTheType(analogRead(IDPinCon3), false)));
+	aJson.addItemToObject(port3, "value", aJson.createItem(sen.getSensorValue(3, sen.idTheType(analogRead(IDPinCon3), false))));
 	
 
   }
@@ -357,57 +364,57 @@ void loop()
  //   int senval1 = sen.getSensorValue(1, sensorType);
  //   Serial.print("-------------->");
  //   //Serial.println(senval1);
- DHT22_ERROR_t errorCode;
-
-  // The sensor can only be read from every 1-2s, and requires a minimum
-  // 2s warm-up after power-on.
-  delay(2000);
-
-  Serial.print("Requesting data...");
-  errorCode = myDHT22.readData();
-  switch(errorCode)
-  {
-    case DHT_ERROR_NONE:
-      Serial.print("Got Data ");
-      Serial.print(myDHT22.getTemperatureC());
-      Serial.print("C ");
-      Serial.print(myDHT22.getHumidity());
-      Serial.println("%");
-      // Alternately, with integer formatting which is clumsier but more compact to store and
-	  // can be compared reliably for equality:
-	  //	  
-      char buf[128];
-      sprintf(buf, "Integer-only reading: Temperature %hi.%01hi C, Humidity %i.%01i %% RH",
-                   myDHT22.getTemperatureCInt()/10, abs(myDHT22.getTemperatureCInt()%10),
-                   myDHT22.getHumidityInt()/10, myDHT22.getHumidityInt()%10);
-      Serial.println(buf);
-      break;
-    case DHT_ERROR_CHECKSUM:
-      Serial.print("check sum error ");
-      Serial.print(myDHT22.getTemperatureC());
-      Serial.print("C ");
-      Serial.print(myDHT22.getHumidity());
-      Serial.println("%");
-      break;
-    case DHT_BUS_HUNG:
-      Serial.println("BUS Hung ");
-      break;
-    case DHT_ERROR_NOT_PRESENT:
-      Serial.println("Not Present ");
-      break;
-    case DHT_ERROR_ACK_TOO_LONG:
-      Serial.println("ACK time out ");
-      break;
-    case DHT_ERROR_SYNC_TIMEOUT:
-      Serial.println("Sync Timeout ");
-      break;
-    case DHT_ERROR_DATA_TIMEOUT:
-      Serial.println("Data Timeout ");
-      break;
-    case DHT_ERROR_TOOQUICK:
-      Serial.println("Polled to quick ");
-      break;
-  }
+ //DHT22_ERROR_t errorCode;
+ //
+ // // The sensor can only be read from every 1-2s, and requires a minimum
+ // // 2s warm-up after power-on.
+ // delay(2000);
+ //
+ // Serial.print("Requesting data...");
+ // errorCode = myDHT22.readData();
+ // switch(errorCode)
+ // {
+ //   case DHT_ERROR_NONE:
+ //     Serial.print("Got Data ");
+ //     Serial.print(myDHT22.getTemperatureC());
+ //     Serial.print("C ");
+ //     Serial.print(myDHT22.getHumidity());
+ //     Serial.println("%");
+ //     // Alternately, with integer formatting which is clumsier but more compact to store and
+ //     // can be compared reliably for equality:
+ //     //	  
+ //     char buf[128];
+ //     sprintf(buf, "Integer-only reading: Temperature %hi.%01hi C, Humidity %i.%01i %% RH",
+ //                  myDHT22.getTemperatureCInt()/10, abs(myDHT22.getTemperatureCInt()%10),
+ //                  myDHT22.getHumidityInt()/10, myDHT22.getHumidityInt()%10);
+ //     Serial.println(buf);
+ //     break;
+ //   case DHT_ERROR_CHECKSUM:
+ //     Serial.print("check sum error ");
+ //     Serial.print(myDHT22.getTemperatureC());
+ //     Serial.print("C ");
+ //     Serial.print(myDHT22.getHumidity());
+ //     Serial.println("%");
+ //     break;
+ //   case DHT_BUS_HUNG:
+ //     Serial.println("BUS Hung ");
+ //     break;
+ //   case DHT_ERROR_NOT_PRESENT:
+ //     Serial.println("Not Present ");
+ //     break;
+ //   case DHT_ERROR_ACK_TOO_LONG:
+ //     Serial.println("ACK time out ");
+ //     break;
+ //   case DHT_ERROR_SYNC_TIMEOUT:
+ //     Serial.println("Sync Timeout ");
+ //     break;
+ //   case DHT_ERROR_DATA_TIMEOUT:
+ //     Serial.println("Data Timeout ");
+ //     break;
+ //   case DHT_ERROR_TOOQUICK:
+ //     Serial.println("Polled to quick ");
+ //     break;
+ // }
 }
 
 //Code to print out the free memory
@@ -469,4 +476,25 @@ void printProgStr(const prog_char* str) {
     Serial.print(c, byte(0));
     str++;
   }
+}
+
+int analogNoiseReducedRead(int pinNumber)
+{
+  int reading;
+  
+  ADCSRA |= _BV( ADIE );             //Set ADC interrupt
+  set_sleep_mode(SLEEP_MODE_ADC);    //Set sleep mode
+  reading = analogRead(pinNumber);   //Start reading
+  sleep_enable();                    //Enable sleep
+  do
+  {                                  //Loop until reading is completed
+    sei();                           //Enable interrupts
+    sleep_mode();                    //Go to sleep
+    cli();                           //Disable interrupts
+  } while(((ADCSRA&(1<<ADSC))!= 0)); //Loop if the interrupt that woke the cpu was something other than the ADC finishing the reading
+  sleep_disable();                   //Disable sleep
+  ADCSRA &= ~ _BV( ADIE );           //Clear ADC interupt
+  sei();                             //Enable interrupts
+  
+  return(reading);
 }

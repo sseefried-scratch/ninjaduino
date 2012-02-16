@@ -14,9 +14,13 @@ Sensor::Sensor()
   //_pin = pin;
 }
 
-char* Sensor::idTheType(int sensorValue)
+char* Sensor::idTheType(int sensorValue, bool debug)
 {
 	char* sensorType;
+	if (debug){
+		Serial.print("Sensor Value: ");
+		Serial.println(sensorValue);
+	}
 	if (sensorValue > 177 && sensorValue < 190) { // Distance (ideal )
 		sensorType = "DISTANCE";
 		return sensorType;
@@ -34,8 +38,9 @@ char* Sensor::idTheType(int sensorValue)
 		return sensorType;
 	} else {
 		sensorType = "UNKNOWN";
-		Serial.print("bad reading: ");
-		Serial.println(sensorValue);
+		
+		//Serial.print("bad reading: ");
+		//Serial.println(sensorValue);
 		
 		return sensorType;
 	}
@@ -103,6 +108,10 @@ int Sensor::getSensorValue(int port, char* type)
 	else if(type == "BUTTON"){
 		pinMode(dInPin, INPUT);
 		int sensorValue = digitalRead(dInPin);
+		return sensorValue;
+	}
+	else if(type == "PIR"){
+		int sensorValue = analogRead(aInPin);
 		return sensorValue;
 	}
 	else{

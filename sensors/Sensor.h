@@ -13,7 +13,7 @@ class Sensor
 {
   public:
     Sensor();
-	char* idTheType(int pin);
+	char* idTheType(int pin, bool debug);
 	int getSensorValue(int port, char* type);
 	float getTemperature();
     void dot();
