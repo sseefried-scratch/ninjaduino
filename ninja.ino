@@ -479,24 +479,3 @@ void printProgStr(const prog_char* str) {
     str++;
   }
 }
-
-//int analogNoiseReducedRead(int pinNumber)
-//{
-//  int reading;
-//reading = analogRead(IDPinCon3);
-// // ADCSRA |= _BV( ADIE );             //Set ADC interrupt
-// // set_sleep_mode(SLEEP_MODE_ADC);    //Set sleep mode
-// // reading = analogRead(pinNumber);   //Start reading
-// // sleep_enable();                    //Enable sleep
-// // do
-// // {                                  //Loop until reading is completed
-// //   sei();                           //Enable interrupts
-// //   sleep_mode();                    //Go to sleep
-// //   cli();                           //Disable interrupts
-// // } while(((ADCSRA&(1<<ADSC))!= 0)); //Loop if the interrupt that woke the cpu was something other than the ADC finishing the reading
-// // sleep_disable();                   //Disable sleep
-// // ADCSRA &= ~ _BV( ADIE );           //Clear ADC interupt
-// // sei();                             //Enable interrupts
-//  
-//  return(reading);
-//}

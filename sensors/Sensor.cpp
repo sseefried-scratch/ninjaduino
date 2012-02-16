@@ -10,8 +10,7 @@
 
 Sensor::Sensor()
 {
-  //pinMode(pin, OUTPUT);
-  //_pin = pin;
+
 }
 
 char* Sensor::idTheType(int sensorValue, bool debug)
@@ -37,11 +36,7 @@ char* Sensor::idTheType(int sensorValue, bool debug)
 		sensorType = "BUTTON";
 		return sensorType;
 	} else {
-		sensorType = "UNKNOWN";
-		
-		//Serial.print("bad reading: ");
-		//Serial.println(sensorValue);
-		
+		sensorType = "UNKNOWN";		
 		return sensorType;
 	}
 }
@@ -80,11 +75,8 @@ int Sensor::getSensorValue(int port, char* type)
 	
 	
 	else{
-		//Serial.println("--> ERROR");
+		Serial.println("--> ERROR");
 		Serial.print("--> Attempting to assign port: ");
-		//Serial.println(port);
-		//Serial.println("--> Port can only be 1, 2 or 3");
-		//break;	
 	}
 	
 	if(type == "LIGHT"){
@@ -135,22 +127,4 @@ float Sensor::getTemperature()
   float celsius = TemperatureSum*0.0625;
 
   return celsius;
-}
-
-void Sensor::dot()
-{
-	//Serial.println("dot");
-  //digitalWrite(_pin, HIGH);
-  //delay(250);
-  //digitalWrite(_pin, LOW);
-  //delay(250);  
-}
-
-void Sensor::dash()
-{
-	//Serial.println("dash");  
-	//digitalWrite(_pin, HIGH);
-  //delay(1000);
-  //digitalWrite(_pin, LOW);
-  //delay(250);
 }
