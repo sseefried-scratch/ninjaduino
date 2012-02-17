@@ -1,0 +1,7 @@
+# currently unusable because it won't install ffi properly
+
+source "http://rubygems.org"
+
+gem 'ffi', :git => 'git://github.com/ffi/ffi.git'
+gem 'rzmq_brokers'
+gem 'msgpack'

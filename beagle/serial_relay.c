@@ -21,7 +21,9 @@ int main (void)
     
     fprintf(stderr, "first garbage line %s\n", buf);
     while ( getline(&buf, &nbytes, stdin) != -1 ) {
-//        puts(buf);
+#ifdef DEBUG
+         puts(buf);
+#endif
         s_send (publisher, buf);
     }
     // fprintf(stderr, "error reading from stdin\n");

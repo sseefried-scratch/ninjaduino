@@ -30,14 +30,13 @@ end
 # fake id for the moment
 identity = "n:1234"
 
-# time for the log_server to spin up, as well as the broker
+# time for the log_server to spin up
 sleep 5
 
-  cloud_listener = CloudListener.new(master_context, broker, log_transport,reactor, identity)
-  cloud_listener.run
-  #context.sub_socket @sub1_handler
+cloud_listener = CloudListener.new(master_context, broker, log_transport,reactor, identity)
+cloud_listener.run
+
 while true
-  puts "marking time"
   sleep 1
 end
 
