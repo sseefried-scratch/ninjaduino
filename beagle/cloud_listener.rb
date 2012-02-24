@@ -128,6 +128,10 @@ class CloudListener
     end
   end
 
+  def handle_portchange(data)
+    puts "Completely ignoring #{data.inspect} - FIXME"
+  end
+
   def handle_disconnect(message)
     STDERR.puts "how did I get here?"
     exit!

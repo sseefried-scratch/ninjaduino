@@ -17,6 +17,7 @@ class SerialListener
     @cached = {}
     (@topics ||= []) << topic.to_s
     @lines = {}
+    @ninja_ports = {}
   end
 
   def activate_line(id)
@@ -50,8 +51,16 @@ class SerialListener
       data['ports'].each do |chunk|
         k = chunk['port']
         @cached[k] ||= 0 
-        next unless @lines[k]
         value = chunk["value"]
+        type = chunk['type']
+        if @ninja_ports[k] != type
+          # we've had a port change: either a plugin has appeared or disappeared
+          # do something useful
+          @ninja_ports[k] = type
+          client.handle_portchange(k, type)
+        end
+        # if @lines[k] isn't set, we want to report changes, but not send events
+        next unless @lines[k]
         if @cached[k] == 0 && value > @switch_hi
           @cached[k] = 1
         elsif (@cached[k] == 1 && value < @switch_lo)
