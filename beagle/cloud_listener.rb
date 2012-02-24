@@ -9,6 +9,7 @@ require 'rzmq_brokers'
 class CloudListener
   def initialize(master_context, broker, log_transport, reactor, identity)
 
+    @lines = []
     req_method = method(:handle_request)
     dis_method = method(:handle_disconnect)
     @identity = identity
@@ -16,7 +17,7 @@ class CloudListener
     @reactor = reactor
 
     @worker_config = RzmqBrokers::Worker::Configuration.new do
-      name @identity
+      name identity
       exception_handler nil
       poll_interval 250
       context master_context
@@ -24,7 +25,7 @@ class CloudListener
 
       endpoint broker
       connect  true
-      service_name  @identity
+      service_name  identity
       heartbeat_interval 3_000
       heartbeat_retries 3
       on_request  req_method
@@ -73,7 +74,7 @@ class CloudListener
 
   def remove_trigger(request, response)
     safely(response) do
-      @lines.delete(request.data.fetch 'line_id')
+      @lines[request.data.fetch('line').to_i]=nil
     end
   end
   
@@ -81,9 +82,10 @@ class CloudListener
   def add_trigger(request, response)
     safely(response) do
       # stop ignoring stuff coming in
-      @lines[request.data.fetch 'line_id'] = {
+      @lines[request.data.fetch('line').to_i] = {
         :rule_id => request.rule_id,
-        :channel => request.data.fetch(:channel)
+        :channel => request.data.fetch('service'),
+        :action => request.data.fetch('action')
       }
       @worker.succeeded response.sequence_id, response.encode
     end
@@ -93,6 +95,7 @@ class CloudListener
     puts "request"
     # work out what kind of request this is.
     request = NinjaMessage.create_from(worker, message)
+    response = LookupReplySuccess.from_request(request)
     safely(response) do
       raise "don't understand message type #{request.message_type}" unless
         %w{add  remove do}.include? request.message_type
@@ -104,16 +107,25 @@ class CloudListener
 
   def handle_serial(data)
     puts "got #{data.inspect}"    
-    req = LookupRequest.new do
-      service_name "twitter"
-      rule_id 8 
-      message_type "do"
-      entity_type "action"
-      name "tweet_from_me"
-      data({ :time => Time.now.to_s })
+    puts @lines.inspect
+
+    if !(target = @lines[data["port"]])
+      puts "ignoring incoming on #{data['port']}"
+    else
+      service = target[:channel]
+      rule_id = target[:rule_id]  
+      action = target[:action]  
+      req = LookupRequest.new do
+        service_name service
+        rule_id rule_id
+        message_type "do"
+        entity_type "action"
+        # hm, we don't really know this
+        name action
+        data({ :time => Time.now.to_s })
+      end
+      @client.process_request req
     end
-    @client.process_request req
-     
   end
 
   def handle_disconnect(message)
@@ -128,7 +140,6 @@ class CloudListener
     puts e.inspect
     puts e.backtrace
     puts @actions.inspect
-    puts request.rule_id
     
     puts "hope that's enough. weird, no?"
     
