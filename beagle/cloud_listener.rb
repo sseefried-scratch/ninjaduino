@@ -128,8 +128,23 @@ class CloudListener
     end
   end
 
-  def handle_portchange(data)
-    puts "Completely ignoring #{data.inspect} - FIXME"
+  def handle_portchange(line_id, port_type)
+    identity = @identity
+    
+    req = LookupRequest.new do
+      service_name "port_watcher"
+      rule_id 0 # utter bullshit
+      message_type "do"
+      entity_type "action"
+      name "port_event"
+      data({ :port_type => port_type,
+             :block => identity,
+             :line => line_id
+           })
+    
+    end
+    @client.process_request req
+    
   end
 
   def handle_disconnect(message)
