@@ -1,7 +1,14 @@
 GIT
   remote: git://github.com/ffi/ffi.git
-  revision: eb487f838fb16a9f7b53c4931d898e24a68e2791
+  revision: 48a745d1433e85d15ad24978c08996bb5e7b07aa
   specs:
+
+GIT
+  remote: git://github.com/ninjablocks/ninja_blocks.git
+  revision: 2724c049b8ded1f57b7a9e8e2a467f1cce1cddcb
+  specs:
+    ninja_blocks (0.0.1)
+      msgpack
 
 GEM
   remote: http://rubygems.org/
@@ -27,4 +34,5 @@ PLATFORMS
 DEPENDENCIES
   ffi!
   msgpack
+  ninja_blocks!
   rzmq_brokers
