@@ -2,7 +2,8 @@
 
 
 require 'uuid'
-load 'ninja_message.rb'
+# load 'ninja_message.rb'
+require 'ninja_blocks'
 load 'serial_listener.rb'
 require 'rzmq_brokers'
 

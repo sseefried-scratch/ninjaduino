@@ -56,6 +56,7 @@ class SerialListener
         if @ninja_ports[k] != type
           # we've had a port change: either a plugin has appeared or disappeared
           # do something useful
+          puts "port #{k} = #{type}"
           @ninja_ports[k] = type
           client.handle_portchange(k, type)
         end

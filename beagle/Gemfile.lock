@@ -5,7 +5,7 @@ GIT
 
 GIT
   remote: git://github.com/ninjablocks/ninja_blocks.git
-  revision: 2724c049b8ded1f57b7a9e8e2a467f1cce1cddcb
+  revision: c0b4eeba8d215e87c8d9e4359be4ea229a3cca4e
   specs:
     ninja_blocks (0.0.1)
       msgpack
