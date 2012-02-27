@@ -138,7 +138,7 @@ class CloudListener
       message_type "do"
       entity_type "action"
       name "port_event"
-      data({ :port_type => port_type,
+      data({ :port_type => port_type.downcase,
              :block => identity,
              :line => line_id
            })
