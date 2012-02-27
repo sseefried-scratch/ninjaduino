@@ -67,7 +67,7 @@ class SerialListener
                 puts "port #{k} = #{type}"
                 @changed[k] = 0
                 @ninja_ports[k] = type
-                client.handle_portchange(k, type)
+                @client.handle_portchange(k, type)
              end
           else
             @new_port[k] = type 

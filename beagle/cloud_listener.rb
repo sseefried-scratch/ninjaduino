@@ -116,7 +116,7 @@ class CloudListener
       service = target[:channel]
       rule_id = target[:rule_id]  
       action = target[:action]  
-      req = LookupRequest.new do
+      req = NinjaBlocks::LookupRequest.new do
         service_name service
         rule_id rule_id
         message_type "do"
@@ -130,9 +130,10 @@ class CloudListener
   end
 
   def handle_portchange(line_id, port_type)
+    puts "handling a portchange"
     identity = @identity
-    
-    req = LookupRequest.new do
+    begin 
+    req = NinjaBlocks::LookupRequest.new do
       service_name "port_watcher"
       rule_id 0 # utter bullshit
       message_type "do"
@@ -144,8 +145,11 @@ class CloudListener
            })
     
     end
+    puts "sending #{req.inspect}"
     @client.process_request req
-    
+    rescue => e
+      puts e.inspect
+    end
   end
 
   def handle_disconnect(message)
