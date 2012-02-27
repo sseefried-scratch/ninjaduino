@@ -12,6 +12,8 @@ class SerialListener
     @state = 0
     @context = context
     @received_count = 0
+    @changed=  []
+    @new_port = []
     @ports = ports
     @client = client
     @cached = {}
@@ -55,10 +57,21 @@ class SerialListener
         type = chunk['type']
         if @ninja_ports[k] != type
           # we've had a port change: either a plugin has appeared or disappeared
-          # do something useful
-          puts "port #{k} = #{type}"
-          @ninja_ports[k] = type
-          client.handle_portchange(k, type)
+	  # need some smoothing: only change if we get the same thing three times in a row.
+          @changed[k] ||= 0
+          if @new_port[k] == type
+             # same as last time
+             @changed[k] += 1
+             if @changed[k] >= 3 
+                # switch!
+                puts "port #{k} = #{type}"
+                @changed[k] = 0
+                @ninja_ports[k] = type
+                client.handle_portchange(k, type)
+             end
+          else
+            @new_port[k] = type 
+          end
         end
         # if @lines[k] isn't set, we want to report changes, but not send events
         next unless @lines[k]
