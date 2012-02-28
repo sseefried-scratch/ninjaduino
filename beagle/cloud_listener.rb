@@ -116,6 +116,8 @@ class CloudListener
       service = target[:channel]
       rule_id = target[:rule_id]  
       action = target[:action]  
+      req = NinjaBlocks::LookupRequest.new do
+        service_name service
         rule_id rule_id
         message_type "do"
         entity_type "action"
