@@ -51,7 +51,7 @@ class SerialListener
 #      puts data.inspect
       # puts @cached.inspect
       data['ports'].each do |chunk|
-        k = chunk['port']
+        k = chunk['port'].to_i
         @cached[k] ||= 0 
         value = chunk["value"]
         type = chunk['type']
@@ -74,7 +74,7 @@ class SerialListener
           end
         end
         # if @lines[k] isn't set, we want to report changes, but not send events
-        next unless @lines[k]
+        next unless  @lines[k]
         if @cached[k] == 0 && value > @switch_hi
           @cached[k] = 1
         elsif (@cached[k] == 1 && value < @switch_lo)

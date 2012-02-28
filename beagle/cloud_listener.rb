@@ -61,7 +61,6 @@ class CloudListener
     ctx = ZM::Reactor.new.run do |context|
       @serial = SerialListener.new(context, [5556], self, '')
       context.sub_socket @serial    
-      @serial.activate_line(2) # hack
     end
   end
 
@@ -75,7 +74,9 @@ class CloudListener
 
   def remove_trigger(request, response)
     safely(response) do
-      @lines[request.data.fetch('line').to_i]=nil
+      
+      @lines[request.data.fetch('line').to_i] = nil
+      @serial.deactivate_line(request.data.fetch('line').to_i)
     end
   end
   
@@ -83,6 +84,7 @@ class CloudListener
   def add_trigger(request, response)
     safely(response) do
       # stop ignoring stuff coming in
+      @serial.activate_line(request.data.fetch('line').to_i)
       @lines[request.data.fetch('line').to_i] = {
         :rule_id => request.rule_id,
         :channel => request.data.fetch('service'),
@@ -110,8 +112,8 @@ class CloudListener
     puts "got #{data.inspect}"    
     puts @lines.inspect
 
-    if !(target = @lines[data["port"]])
-      puts "ignoring incoming on #{data['port']}"
+    if !(target = @lines[data["port"].to_i])
+      puts "ignoring incoming on #{data['port']}: lines is #{@lines.inspect}"
     else
       service = target[:channel]
       rule_id = target[:rule_id]  
