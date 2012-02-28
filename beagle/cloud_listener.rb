@@ -95,14 +95,14 @@ class CloudListener
   def handle_request(worker, message)
     puts "request"
     # work out what kind of request this is.
-    request = NinjaMessage.create_from(worker, message)
-    response = LookupReplySuccess.from_request(request)
+    request = NinjaBlocks::Message.create_from(worker, message)
+    response = NinjaBlocks::LookupReplySuccess.from_request(request)
     safely(response) do
       raise "don't understand message type #{request.message_type}" unless
         %w{add  remove do}.include? request.message_type
       raise "don't understand entity type #{request.entity_type}" unless
         %w{trigger action}.include? request.entity_type
-      self.send "#{request.message_type}_#{request.entity_type}", request, LookupReplySuccess.from_request(request)
+      self.send "#{request.message_type}_#{request.entity_type}", request, NinjaBlocks::LookupReplySuccess.from_request(request)
     end
   end
 
@@ -116,8 +116,6 @@ class CloudListener
       service = target[:channel]
       rule_id = target[:rule_id]  
       action = target[:action]  
-      req = NinjaBlocks::LookupRequest.new do
-        service_name service
         rule_id rule_id
         message_type "do"
         entity_type "action"
