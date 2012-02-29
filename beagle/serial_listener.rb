@@ -58,7 +58,8 @@ class SerialListener
           end
         end
       rescue => e
-        puts "got an error: #{e}"
+        # let's clean the arduino stream up soon, hm?
+        # puts "got an error: #{e}"
       end 
     end
   end
