@@ -6,12 +6,13 @@
 
 class Line
   LIMIT = 2
-  def initialise(line_id)
-    @line_id = line_id
+  def initialize(line_id)
+    @line_id = line_id.to_i
     @triggers = {}
     @changed = 0
     @accessory = nil
     @new_accessory = nil
+    puts "Top: #{@triggers.inspect}"
   end
   
   def add_trigger(rule_id, trigger)
@@ -23,6 +24,7 @@ class Line
   end
 
   def portchanged?(accessory_type)
+    puts "port changed for #{accessory_type}, #{@line_id}?"
     orig = @accessory
     if accessory_type != @accessory
       if accessory_type == @new_accessory
@@ -46,6 +48,7 @@ class Line
   end
   
   def update(chunk)
+puts "triggers is #{@triggers.inspect}"
     @triggers.each do |rule_id, trigger|
       value = chunk["value"]
       type = chunk['type'] # should this matter at this point?

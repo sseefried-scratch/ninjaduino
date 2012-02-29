@@ -32,7 +32,8 @@ class SerialListener
   def add_trigger(line, rule_id, channel_id, action)
 
     trigger = Trigger.new channel, action.data['reset_level'], action.data['trigger_level']
-    (@lines[line] ||= Line.new line).add_trigger(rule_id,trigger)
+    @lines[line] ||= Line.new line
+    @lines[line].add_trigger(rule_id,trigger)
     
   end
 
@@ -50,11 +51,11 @@ class SerialListener
       rescue =>  e
       end
       next unless data
-      puts "Data is data.inspect
+      puts "Data is #{data.inspect}"
       data['ports'].each do |chunk|
         k = chunk['port']
         type = chunk['type']
-        puts chunk
+        puts "Chunk is #{chunk.inspect}"
         puts "#{k}:#{type}"
         line = (@lines[k] ||= Line.new k)
         @client.handle_portchange(k,type) if line.portchanged?(type)
