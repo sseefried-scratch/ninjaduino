@@ -22,7 +22,7 @@ class Line
     @triggers.delete rule_id
   end
 
-  def check_for_portchange(accessory_type)
+  def portchanged?(accessory_type)
     if accessory_type != @accessory
       if accessory_type == @new_accessory
         @changed+=1
@@ -36,8 +36,11 @@ class Line
         @triggers.each do |k, trigger|
           trigger.enabled = trigger.channel == @accessory
         end
+        return true
       end
     end
+    return false
+
   end
   
   def update(chunk)

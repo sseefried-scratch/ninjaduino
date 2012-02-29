@@ -51,10 +51,7 @@ class SerialListener
           k = chunk['port'].to_i
           type = chunk['type']
           line = (@lines[k] ||= Line.new k)
-          line.check_for_portchange(type) do
-            @client.handle_portchange(k,type)
-          end
-          
+          @client.handle_portchange(k,type) if line.portchanged?(type)
           line.update(chunk)
         end
       rescue => e
