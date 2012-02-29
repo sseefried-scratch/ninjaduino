@@ -74,9 +74,10 @@ class CloudListener
 
   def remove_trigger(request, response)
     safely(response) do
-      
-      @lines[request.data.fetch('line').to_i] = nil
-      @serial.deactivate_line(request.data.fetch('line').to_i)
+      @serial.remove_trigger(request.data.fetch('line').to_i,
+                             request.rule_id(
+#      @lines[request.data.fetch('line').to_i] = nil
+#      @serial.deactivate_line(request.data.fetch('line').to_i)
     end
   end
   
@@ -84,12 +85,17 @@ class CloudListener
   def add_trigger(request, response)
     safely(response) do
       # stop ignoring stuff coming in
-      @serial.activate_line(request.data.fetch('line').to_i)
-      @lines[request.data.fetch('line').to_i] = {
-        :rule_id => request.rule_id,
-        :channel => request.data.fetch('service'),
-        :action => request.data.fetch('action')
-      }
+      @serial.add_trigger(request.data.fetch('line').to_i,
+                          request.rule_id,
+                          request.data.fetch('service'),
+                          request.data.fetch('action'))
+      
+      # @serial.activate_line(
+      # @lines[request.data.fetch('line').to_i] = {
+      #   :rule_id => request.rule_id,
+      #   :channel => request.data.fetch('service'),
+      #   :action => request.data.fetch('action')
+      # }
       @worker.succeeded response.sequence_id, response.encode
     end
   end

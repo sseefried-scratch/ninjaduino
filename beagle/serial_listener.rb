@@ -10,22 +10,11 @@ require 'json'
 class SerialListener
   attr_reader :topics
   def initialize context, ports, client, topic = nil
-
     
-    
-    @switch_lo = 10
-    @switch_hi = 1000
-    @state = 0
     @context = context
-    @received_count = 0
-    @changed=  []
-    @new_port = []
     @ports = ports
     @client = client
-    @cached = {}
     (@topics ||= []) << topic.to_s
-    @lines = {}
-    @ninja_ports = {}
   end
 
   def activate_line(id)
@@ -50,49 +39,33 @@ class SerialListener
     end
   end
 
+  def add_trigger(line, rule_id, channel, action)
+    
+  end
+
+  def remove_trigger(line, rule_id)
+
+  end
+  
   def on_readable socket, messages
     messages.each do |m|
       begin
-      data = JSON.parse m.copy_out_string
-#      puts data.inspect
-      # puts @cached.inspect
-      data['ports'].each do |chunk|
-        k = chunk['port'].to_i
-        @cached[k] ||= 0 
-        value = chunk["value"]
-        type = chunk['type']
-        if @ninja_ports[k] != type
-          # we've had a port change: either a plugin has appeared or disappeared
-	  # need some smoothing: only change if we get the same thing three times in a row.
-          @changed[k] ||= 0
-          if @new_port[k] == type
-             # same as last time
-             @changed[k] += 1
-             if @changed[k] >= 3 
-                # switch!
-                puts "port #{k} = #{type}"
-                @changed[k] = 0
-                @ninja_ports[k] = type
-                @client.handle_portchange(k, type)
-             end
-          else
-            @new_port[k] = type 
+        data = JSON.parse m.copy_out_string
+        #      puts data.inspect
+        # puts @cached.inspect
+        data['ports'].each do |chunk|
+          k = chunk['port'].to_i
+          type = chunk['type']
+          if line = @lines[k]
+            line.check_for_portchange(type) do
+              @client.handle_portchange(k,type)
+            end
+            line.update(chunk)
           end
-        end
-        # if @lines[k] isn't set, we want to report changes, but not send events
-        next unless  @lines[k]
-        if @cached[k] == 0 && value > @switch_hi
-          @cached[k] = 1
-        elsif (@cached[k] == 1 && value < @switch_lo)
-          @cached[k]=0
-          # send button up event
-          @client.handle_serial chunk.merge({:line_id => k})      
-        else
-	  next
         end
       end
       rescue => e
-#        puts "got an error: #{e}"
+        puts "got an error: #{e}"
       end 
     end
   end

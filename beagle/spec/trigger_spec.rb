@@ -5,7 +5,7 @@ require 'trigger'
 describe Trigger do
   describe "thermometer" do
     before :each do
-      @t = Trigger.new(20, 40, lambda{|x| x})
+      @t = Trigger.new("thermometer", 20, 40)
     end
     
     it "fires when it gets too hot" do
@@ -34,7 +34,7 @@ describe Trigger do
   end
   describe "inverted thermometer" do
     before :each do
-      @t = Trigger.new(40, 20, lambda{|x| x})
+      @t = Trigger.new("thermometer", 40, 20, lambda{|x| x})
     end
 
     it 'fires when it gets cold enough' do
@@ -49,6 +49,22 @@ describe Trigger do
     end
     
   end
+  describe 'non-const transformer' do
+    it 'should handle a transformer'
+  end
 
+  describe 'default button' do
+    before :each do
+      @t = Trigger.new("button")
+    end
+
+    it 'should fire' do
+      @t.fire?(1010).should be_true
+      @t.fire?(1010).should be_false
+      @t.fire?(0).should be_false
+      @t.fire?(1010).should be_true
+    end
+  end
+  
   
 end
