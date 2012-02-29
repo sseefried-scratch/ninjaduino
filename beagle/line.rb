@@ -23,6 +23,7 @@ class Line
   end
 
   def portchanged?(accessory_type)
+    orig = @accessory
     if accessory_type != @accessory
       if accessory_type == @new_accessory
         @changed+=1
@@ -36,6 +37,7 @@ class Line
         @triggers.each do |k, trigger|
           trigger.enabled = trigger.channel == @accessory
         end
+        puts "changed from #{orig} to #{@accessory}!"
         return true
       end
     end
