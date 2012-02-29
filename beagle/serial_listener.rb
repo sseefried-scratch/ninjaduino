@@ -57,7 +57,6 @@ class SerialListener
             line.update(chunk)
           end
         end
-      end
       rescue => e
         puts "got an error: #{e}"
       end 
