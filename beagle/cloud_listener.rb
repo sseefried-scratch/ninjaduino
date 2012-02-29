@@ -73,31 +73,29 @@ class CloudListener
   end
 
   def remove_trigger(request, response)
-    safely(response) do
-      @serial.remove_trigger(request.data.fetch('line').to_i,
-                             request.rule_id(
+    @serial.remove_trigger(request.data.fetch('line').to_i,
+                           request.rule_id)
+    response.answer "ok"
 #      @lines[request.data.fetch('line').to_i] = nil
-#      @serial.deactivate_line(request.data.fetch('line').to_i)
-    end
+      # @serial.deactivate_line(request.data.fetch('line').to_i)
+    @worker.succeeded response.sequence_id, response.encode
   end
   
 
   def add_trigger(request, response)
-    safely(response) do
-      # stop ignoring stuff coming in
-      @serial.add_trigger(request.data.fetch('line').to_i,
+    # stop ignoring stuff coming in
+    @serial.add_trigger(request.data.fetch('line').to_i,
                           request.rule_id,
                           request.data.fetch('service'),
                           request.data.fetch('action'))
-      
+    response.answer "ok"
       # @serial.activate_line(
       # @lines[request.data.fetch('line').to_i] = {
       #   :rule_id => request.rule_id,
       #   :channel => request.data.fetch('service'),
       #   :action => request.data.fetch('action')
       # }
-      @worker.succeeded response.sequence_id, response.encode
-    end
+    @worker.succeeded response.sequence_id, response.encode
   end
   
   def handle_request(worker, message)
@@ -110,7 +108,7 @@ class CloudListener
         %w{add  remove do}.include? request.message_type
       raise "don't understand entity type #{request.entity_type}" unless
         %w{trigger action}.include? request.entity_type
-      self.send "#{request.message_type}_#{request.entity_type}", request, NinjaBlocks::LookupReplySuccess.from_request(request)
+      self.send "#{request.message_type}_#{request.entity_type}", request, response
     end
   end
 
