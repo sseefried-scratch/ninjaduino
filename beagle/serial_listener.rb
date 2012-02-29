@@ -50,12 +50,12 @@ class SerialListener
         data['ports'].each do |chunk|
           k = chunk['port'].to_i
           type = chunk['type']
-          if line = @lines[k]
-            line.check_for_portchange(type) do
-              @client.handle_portchange(k,type)
-            end
-            line.update(chunk)
+          line = (@lines[k] ||= Line.new k)
+          line.check_for_portchange(type) do
+            @client.handle_portchange(k,type)
           end
+          
+          line.update(chunk)
         end
       rescue => e
         # let's clean the arduino stream up soon, hm?
