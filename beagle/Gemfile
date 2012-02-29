@@ -2,7 +2,14 @@
 
 source "http://rubygems.org"
 
-gem 'ffi', :git => 'git://github.com/ffi/ffi.git'
+# gem 'ffi', :git => 'git://github.com/ffi/ffi.git'
 gem 'rzmq_brokers'
 gem 'msgpack'
 gem 'ninja_blocks', :git => "git://github.com/ninjablocks/ninja_blocks.git"
+
+group :development do
+  gem 'rspec'
+  gem 'autotest'
+  gem 'autotest-growl'
+end
+  

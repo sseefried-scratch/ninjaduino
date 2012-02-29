@@ -4,9 +4,15 @@ require 'zmqmachine'
 require 'json'
 
 
+
+
+
 class SerialListener
   attr_reader :topics
   def initialize context, ports, client, topic = nil
+
+    
+    
     @switch_lo = 10
     @switch_hi = 1000
     @state = 0

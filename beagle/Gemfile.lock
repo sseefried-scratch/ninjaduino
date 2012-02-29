@@ -1,9 +1,4 @@
 GIT
-  remote: git://github.com/ffi/ffi.git
-  revision: 48a745d1433e85d15ad24978c08996bb5e7b07aa
-  specs:
-
-GIT
   remote: git://github.com/ninjablocks/ninja_blocks.git
   revision: c0b4eeba8d215e87c8d9e4359be4ea229a3cca4e
   specs:
@@ -13,12 +8,25 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
+    ZenTest (4.6.2)
+    autotest (4.4.6)
+      ZenTest (>= 4.4.1)
+    autotest-growl (0.2.16)
+    diff-lcs (1.1.3)
     ffi (1.0.11)
     ffi-rzmq (0.9.3)
       ffi
     macaddr (1.5.0)
       systemu (>= 2.4.0)
     msgpack (0.4.6)
+    rspec (2.7.0)
+      rspec-core (~> 2.7.0)
+      rspec-expectations (~> 2.7.0)
+      rspec-mocks (~> 2.7.0)
+    rspec-core (2.7.1)
+    rspec-expectations (2.7.0)
+      diff-lcs (~> 1.1.2)
+    rspec-mocks (2.7.0)
     rzmq_brokers (0.7.1)
       uuid
       zmqmachine (>= 0.7.0)
@@ -32,7 +40,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  ffi!
+  autotest
+  autotest-growl
   msgpack
   ninja_blocks!
+  rspec
   rzmq_brokers
