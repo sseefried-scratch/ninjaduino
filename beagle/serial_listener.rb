@@ -2,8 +2,7 @@ require 'rubygems'
 require 'ffi-rzmq'
 require 'zmqmachine'
 require 'json'
-
-
+load './line.rb'
 
 
 
@@ -45,18 +44,21 @@ class SerialListener
   
   def on_readable socket, messages
     messages.each do |m|
+      data = nil
       begin
         data = JSON.parse m.copy_out_string
-        data['ports'].each do |chunk|
-          k = chunk['port'].to_i
-          type = chunk['type']
-          line = (@lines[k] ||= Line.new k)
-          @client.handle_portchange(k,type) if line.portchanged?(type)
-          line.update(chunk)
-        end
-      rescue => e
-        # let's clean the arduino stream up soon, hm?
-        # puts "got an error: #{e}"
+      rescue =>  e
+      end
+      next unless data
+      puts "Data is data.inspect
+      data['ports'].each do |chunk|
+        k = chunk['port']
+        type = chunk['type']
+        puts chunk
+        puts "#{k}:#{type}"
+        line = (@lines[k] ||= Line.new k)
+        @client.handle_portchange(k,type) if line.portchanged?(type)
+        line.update(chunk)
       end 
     end
   end
