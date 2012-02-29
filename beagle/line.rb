@@ -1,3 +1,9 @@
+# Weird as it seems, each line may maintain many triggers.
+# this ranges from sensible (below 10 degrees, turn on heaters - above
+# 50, turn on aircon) to dubious (one rule for when a button is
+# plugged in to line x, another for when a humidity sensor is), but
+# the overriding goal is not to surprise the user.
+
 class Line
   LIMIT = 2
   def initialise(line_id)

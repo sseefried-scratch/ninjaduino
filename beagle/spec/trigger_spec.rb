@@ -34,7 +34,7 @@ describe Trigger do
   end
   describe "inverted thermometer" do
     before :each do
-      @t = Trigger.new("thermometer", 40, 20, lambda{|x| x})
+      @t = Trigger.new("thermometer", 40, 20)
     end
 
     it 'fires when it gets cold enough' do

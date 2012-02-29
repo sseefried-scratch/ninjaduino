@@ -9,22 +9,23 @@ class Trigger
   }
   attr_reader :channel, :enabled
   def initialize(channel,
-                 reset_level=CHANNEL_DEFAULTS[channel]['reset_level'],
-                 trigger_level=CHANNEL_DEFAULTS[channel]['trigger_level'],
-                 transformer=lambda{|x| x})
+                 reset_level=nil,
+                 trigger_level=nil) 
+
     # if reset_level is higher than the trigger level, then
     # that means we're approaching the trigger from above - ie,
     # trigger if temperature goes _below_ X.
+    defaults = CHANNEL_DEFAULTS[channel] || {}
+    @reset_level = reset_level || defaults['reset_level']
+    @trigger_level = trigger_level || defaults['trigger_level']
+    @transformer = defaults['transformer'] || lambda{|x|x}
 
     @channel = channel
     @enabled = true
     @fired = false
-    @comparator = reset_level > trigger_level ? lambda {|x,y| x < y}
-                                              : lambda {|x,y| x > y}
+    @comparator = @reset_level > @trigger_level ? lambda {|x,y| x < y}
+                                                : lambda {|x,y| x > y}
 
-    @reset_level= reset_level
-    @trigger_level = trigger_level
-    @transformer = transformer
   end
 
   def enabled=(val)
@@ -32,6 +33,7 @@ class Trigger
       if val == false
         # send a message somehow - we've been disabled, and the rule
         # should be marked as inactive FIXME
+        warn "should be notifying server"
       end
     end
     @enabled = val
