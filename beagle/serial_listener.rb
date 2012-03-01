@@ -29,18 +29,16 @@ class SerialListener
     end
   end
 
-  def add_trigger(line, rule_id, channel_id, action)
-
-    trigger = Trigger.new channel, action.data['reset_level'], action.data['trigger_level']
+  # send all the updates until we die
+  # should probably be merged with add_trigger
+  def add_monitor(line, monitor)
+    # monitor the line, send to port_watcher constantly.
     @lines[line] ||= Line.new line
-    @lines[line].add_trigger(rule_id,trigger)
-    
+    @lines[line].add_monitor(monitor)Monitor.new(timeout))
   end
 
   def remove_trigger(line, rule_id)
-    if line = @lines[line]
-      line.remove_trigger(rule_id)
-    end
+    @lines[line].try(:remove_monitor, rule_id)
   end
   
   def on_readable socket, messages
@@ -59,7 +57,7 @@ class SerialListener
         puts "#{k}:#{type}"
         line = (@lines[k] ||= Line.new k)
         @client.handle_portchange(k,type) if line.portchanged?(type)
-        line.update(chunk)
+        line.update(chunk, @client)
       end 
     end
   end

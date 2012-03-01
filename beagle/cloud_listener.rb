@@ -80,14 +80,23 @@ class CloudListener
       # @serial.deactivate_line(request.data.fetch('line').to_i)
     @worker.succeeded response.sequence_id, response.encode
   end
-  
+
+  def add_monitor(request,response)
+    @serial.add_monitor(request.data.fetch('line').to_i,
+                        Monitor.new(60))
+    response.answer "ok"
+    @worker.succeeded response.sequence_id, response.encode
+  end
 
   def add_trigger(request, response)
     # stop ignoring stuff coming in
-    @serial.add_trigger(request.data.fetch('line').to_i,
+    trigger = Trigger.new(request.data.fetch('service'),
                           request.rule_id,
-                          request.data.fetch('service'),
-                          request.data.fetch('action'))
+                          request.data.fetch('action'),
+                          request.data['reset_level'],
+                          request.data['trigger_level'])
+    @serial.add_monitor(request.data.fetch('line').to_i,trigger)
+
     response.answer "ok"
       # @serial.activate_line(
       # @lines[request.data.fetch('line').to_i] = {
@@ -107,7 +116,7 @@ class CloudListener
       raise "don't understand message type #{request.message_type}" unless
         %w{add  remove do}.include? request.message_type
       raise "don't understand entity type #{request.entity_type}" unless
-        %w{trigger action}.include? request.entity_type
+        %w{trigger action monitor}.include? request.entity_type
       self.send "#{request.message_type}_#{request.entity_type}", request, response
     end
   end
