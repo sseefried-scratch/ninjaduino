@@ -28,15 +28,15 @@ class SerialListener
       end
     end
   end
-
+  
   # send all the updates until we die
   # should probably be merged with add_trigger
   def add_monitor(line, monitor)
     # monitor the line, send to port_watcher constantly.
     @lines[line] ||= Line.new line
-    @lines[line].add_monitor(monitor)Monitor.new(timeout))
+    @lines[line].add_monitor(monitor)
   end
-
+  
   def remove_trigger(line, rule_id)
     @lines[line].try(:remove_monitor, rule_id)
   end

@@ -5,7 +5,7 @@ require 'trigger'
 describe Trigger do
   describe "thermometer" do
     before :each do
-      @t = Trigger.new("thermometer", 20, 40)
+      @t = Trigger.new("thermometer", 10, "someaction", 20, 40)
     end
     
     it "fires when it gets too hot" do
@@ -34,7 +34,7 @@ describe Trigger do
   end
   describe "inverted thermometer" do
     before :each do
-      @t = Trigger.new("thermometer", 40, 20)
+      @t = Trigger.new("thermometer", 10, "someaction", 40, 20)
     end
 
     it 'fires when it gets cold enough' do
@@ -55,7 +55,7 @@ describe Trigger do
 
   describe 'default button' do
     before :each do
-      @t = Trigger.new("button")
+      @t = Trigger.new("button", 10, "someaction")
     end
 
     it 'should fire' do
