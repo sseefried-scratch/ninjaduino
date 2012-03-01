@@ -49,11 +49,6 @@ class Line
   end
   
   def update(chunk, client)
-    time = getTimeOfDAy()
-    @monitors = @monitors.reject_if? {|m| m.finished?(time) }
-    @monitors.each do |m|
-      @client.send_update chunk
-    end
     
     @monitors.reject! do |monitor|
       value = chunk["value"]
