@@ -34,7 +34,7 @@ class Trigger
     if fire?(value)
       rule_id = @rule_id
       action = @action
-      yield NinjaBlocks::LookupRequest.new do
+      req = NinjaBlocks::LookupRequest.new do
         service_name channel
         rule_id rule_id
         message_type "do"
@@ -42,6 +42,7 @@ class Trigger
         action action
         data({:time => Time.now.to_s, :value => value})
       end
+      yield req
     end
     false
     
