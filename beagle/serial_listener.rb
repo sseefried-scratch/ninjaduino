@@ -49,12 +49,10 @@ class SerialListener
       rescue =>  e
       end
       next unless data
-      puts "Data is #{data.inspect}"
       data['ports'].each do |chunk|
         k = chunk['port']
         type = chunk['type']
-        puts "Chunk is #{chunk.inspect}"
-        puts "#{k}:#{type}"
+        # puts "#{k}:#{type}"
         line = (@lines[k] ||= Line.new k)
         @client.handle_portchange(k,type) if line.portchanged?(type)
         line.update(chunk, @client)
