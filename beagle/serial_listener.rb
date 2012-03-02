@@ -3,7 +3,7 @@ require 'ffi-rzmq'
 require 'zmqmachine'
 require 'json'
 load './line.rb'
-
+load './monitor.rb'
 
 
 class SerialListener
