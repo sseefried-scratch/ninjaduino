@@ -20,11 +20,11 @@ class Monitor
     # send an update
     puts "sending an update for channel #{@channel}: #{value}"
     req = NinjaBlocks::LookupRequest.new do
-      name "monitor"
       service_name "port_watcher"
       rule_id 0
       message_type "do"
       entity_type "action"
+      name "monitor"      
       data({ :value => value })
     end
     yield req

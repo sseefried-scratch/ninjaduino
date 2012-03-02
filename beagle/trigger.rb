@@ -39,8 +39,8 @@ class Trigger
         rule_id rule_id
         message_type "do"
         entity_type "action"
-        action action
-        data({:time => Time.now.to_s, :value => value})
+        name action
+        data({})
       end
       yield req
     end

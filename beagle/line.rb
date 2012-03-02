@@ -51,9 +51,10 @@ class Line
     @monitors.reject! do |monitor|
       value = chunk["value"]
       type = chunk['type'].downcase # should this matter at this point?
-      
+      extras = { :line => @line_id, :port_type => @accessory}
       if type == monitor.channel
         monitor.last?(value) do |message|
+          message.data.merge!(extras)
           client.process_request message
         end
       else
