@@ -1,4 +1,6 @@
 class Monitor
+  attr_reader :channel
+  
   def initialize(timeout, channel)
     @deadline = Time.now + timeout
     @channel = channel
