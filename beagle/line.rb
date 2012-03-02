@@ -23,8 +23,6 @@ class Line
   end
 
   def portchanged?(accessory_type)
-    puts "port changed for #{accessory_type}, #{@line_id}?"
-    puts "monitors: #{@monitors.inspect}"
     orig = @accessory
     if accessory_type != @accessory
       if accessory_type == @new_accessory
