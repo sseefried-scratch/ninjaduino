@@ -24,6 +24,7 @@ class Monitor
       rule_id 0
       message_type "do"
       entity_type "action"
+      action "monitor"
       data({ :value => value })
     end
     yield req
