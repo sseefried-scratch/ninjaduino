@@ -35,6 +35,7 @@ class Line
       if @changed > LIMIT
         @accessory = accessory_type
         @changed = 0
+        puts "monitors: #{@monitors.inspect}"
         @monitors.each do |trigger|
           trigger.current_accessory = @accessory
         end
