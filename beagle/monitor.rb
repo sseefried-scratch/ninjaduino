@@ -14,6 +14,7 @@ class Monitor
   
   def finished?(value)
     # send an update
+    puts "sending an update for channel #{@channel}: #{value}"
     yield NinjaBlocks::LookupRequest.new do
       service_name "port_watcher"
       rule_id 0
