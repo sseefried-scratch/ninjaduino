@@ -12,15 +12,14 @@ class Line
     @changed = 0
     @accessory = nil
     @new_accessory = nil
-    puts "Top: #{@triggers.inspect}"
   end
   
   def add_monitor(monitor)
-    @triggers << monitor
+    @monitors << monitor
   end
 
   def remove_monitor(rule_id)
-    @triggers.delete{|trigger| trigger.rule_id == rule_id}
+    @monitors.delete{|trigger| trigger.rule_id == rule_id}
   end
 
   def portchanged?(accessory_type)
@@ -36,7 +35,7 @@ class Line
       if @changed > LIMIT
         @accessory = accessory_type
         @changed = 0
-        @triggers.each do |trigger|
+        @monitors.each do |trigger|
           trigger.current_accessory = @accessory
         end
         puts "changed from #{orig} to #{@accessory}!"
