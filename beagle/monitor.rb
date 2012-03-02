@@ -10,11 +10,13 @@ class Monitor
   def current_accessory=(accessory)
     if @channel != accessory
       # might as well kill the updates, we're not plugged in any more.
+      puts "killing the updates for #{@channel}, not plugged in any more"
       @deadline = Time.now
     end
   end
   
   def finished?(value)
+    return true if  @deadline < Time.now
     # send an update
     puts "sending an update for channel #{@channel}: #{value}"
     req = NinjaBlocks::LookupRequest.new do
@@ -26,7 +28,7 @@ class Monitor
       data({ :value => value})
     end
     yield req
-    return @deadline < Time.now
+    return false
   end
   
 end

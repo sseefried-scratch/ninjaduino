@@ -57,6 +57,7 @@ class Line
           client.process_request message
         end
       else
+        puts "#{monitor.channel} registered, but #{type} attached"
         false
       end
     end
