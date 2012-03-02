@@ -58,11 +58,13 @@ class CloudListener
     puts "run"
     @worker = RzmqBrokers::Worker::Worker.new(@worker_config)
     @client = RzmqBrokers::Client::Client.new(@client_config)
-    # testing only
-    puts @serial.inspect
-    @serial.add_monitor(1, Monitor.new(60, "distance"))
+
     ctx = ZM::Reactor.new.run do |context|
       @serial = SerialListener.new(context, [5556], self, '')
+      # testing only
+      puts @serial.inspect
+      @serial.add_monitor(1, Monitor.new(60, "distance"))
+
       context.sub_socket @serial    
     end
   end
