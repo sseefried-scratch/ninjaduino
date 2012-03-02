@@ -51,26 +51,13 @@ class Line
     @monitors.reject! do |monitor|
       value = chunk["value"]
       type = chunk['type'] # should this matter at this point?
+      
       if type == monitor.channel
         monitor.last?(value) do |message|
           client.process_request message
         end
-          
-        # if monitor.fire?(value)
-        #  @client.handle_serial chunk.merge({:line_id => @line_id})
-          
       else
-        if trigger.enabled
-          # our logic is broken if we get here.
-          raise "port type mismatch: #{type} is not #{trigger.type}"
-        else
-          ## exactly as expected - it's an old trigger that will
-          ## spring back to life when its original accessory is
-          ## plugged back in. keep it in the list, though.
-
-          false
-          
-        end
+        false
       end
     end
   end
