@@ -17,7 +17,7 @@ class Monitor
   def finished?(value)
     # send an update
     puts "sending an update for channel #{@channel}: #{value}"
-    yield NinjaBlocks::LookupRequest.new do
+    req = NinjaBlocks::LookupRequest.new do
       service_name "port_watcher"
       rule_id 0
       message_type "do"
@@ -25,6 +25,7 @@ class Monitor
       action "monitor"
       data({ :value => value})
     end
+    yield req
     return @deadline < Time.now
   end
   
