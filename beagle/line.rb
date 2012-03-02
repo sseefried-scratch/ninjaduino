@@ -6,8 +6,7 @@
 
 class Line
   LIMIT = 2
-  def initialize(line_id, client)
-    client = @client
+  def initialize(line_id)
     @line_id = line_id.to_i
     @monitors = []
     @changed = 0
@@ -48,7 +47,7 @@ class Line
 
   end
   
-  def update(chunk, client)
+  def update(chunk,client)
     
     @monitors.reject! do |monitor|
       value = chunk["value"]

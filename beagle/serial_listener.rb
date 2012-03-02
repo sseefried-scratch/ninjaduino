@@ -57,7 +57,7 @@ class SerialListener
         puts "#{k}:#{type}"
         line = (@lines[k] ||= Line.new k)
         @client.handle_portchange(k,type) if line.portchanged?(type)
-        line.update(chunk, @client)
+        line.update(chunk,@client)
       end 
     end
   end
