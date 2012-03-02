@@ -62,7 +62,6 @@ class CloudListener
     ctx = ZM::Reactor.new.run do |context|
       @serial = SerialListener.new(context, [5556], self, '')
       # testing only
-      puts @serial.inspect
       @serial.add_monitor(1, Monitor.new(60, "distance"))
 
       context.sub_socket @serial    
