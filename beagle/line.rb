@@ -6,21 +6,22 @@
 
 class Line
   LIMIT = 2
-  def initialize(line_id)
+  def initialize(line_id, client)
+    client = @client
     @line_id = line_id.to_i
-    @triggers = {}
+    @monitors = []
     @changed = 0
     @accessory = nil
     @new_accessory = nil
     puts "Top: #{@triggers.inspect}"
   end
   
-  def add_trigger(rule_id, trigger)
-    @triggers[rule_id] = trigger
+  def add_monitor(monitor)
+    @triggers << monitor
   end
 
-  def remove_trigger(rule_id)
-    @triggers.delete rule_id
+  def remove_monitor(rule_id)
+    @triggers.delete{|trigger| trigger.rule_id == rule_id}
   end
 
   def portchanged?(accessory_type)
@@ -36,8 +37,8 @@ class Line
       if @changed > LIMIT
         @accessory = accessory_type
         @changed = 0
-        @triggers.each do |k, trigger|
-          trigger.enabled = trigger.channel == @accessory
+        @triggers.each do |trigger|
+          trigger.current_accessory = @accessory
         end
         puts "changed from #{orig} to #{@accessory}!"
         return true
@@ -52,8 +53,14 @@ class Line
     @monitors.reject! do |monitor|
       value = chunk["value"]
       type = chunk['type'] # should this matter at this point?
-      if type == trigger.channel
-        @client.handle_serial chunk.merge({:line_id => @line_id})  if trigger.fire?(value)
+      if type == monitor.channel
+        monitor.last?(value) do |message|
+          client.process_request message
+        end
+          
+        # if monitor.fire?(value)
+        #  @client.handle_serial chunk.merge({:line_id => @line_id})
+          
       else
         if trigger.enabled
           # our logic is broken if we get here.
@@ -61,7 +68,10 @@ class Line
         else
           ## exactly as expected - it's an old trigger that will
           ## spring back to life when its original accessory is
-          ## plugged back in.
+          ## plugged back in. keep it in the list, though.
+
+          false
+          
         end
       end
     end
