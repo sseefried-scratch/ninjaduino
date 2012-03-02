@@ -8,10 +8,11 @@ load './monitor.rb'
 
 class SerialListener
   attr_reader :topics
-  def initialize context, ports, client, topic = nil
+  def initialize context, ports, client, cloud, topic = nil
     @context = context
     @ports = ports # typically just one
     @client = client
+    @cloud = cloud
     (@topics ||= []) << topic.to_s
     @lines = []
   end
@@ -56,7 +57,7 @@ class SerialListener
         puts "Chunk is #{chunk.inspect}"
         puts "#{k}:#{type}"
         line = (@lines[k] ||= Line.new k)
-        @client.handle_portchange(k,type) if line.portchanged?(type)
+        @cloud.handle_portchange(k,type) if line.portchanged?(type)
         line.update(chunk,@client)
       end 
     end
