@@ -30,7 +30,7 @@ class Trigger
     @action = action
   end
 
-  def finished?(value)
+  def last?(value)
     if fire?(value)
       rule_id = @rule_id
       action = @action

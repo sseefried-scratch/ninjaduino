@@ -15,7 +15,7 @@ class Monitor
     end
   end
   
-  def finished?(value)
+  def last?(value)
     return true if  @deadline < Time.now
     # send an update
     puts "sending an update for channel #{@channel}: #{value}"
