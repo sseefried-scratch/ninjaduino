@@ -1,6 +1,6 @@
 # this is the program the ninja block itself runs.
 
-
+require 'rubygems'
 require 'uuid'
 # load 'ninja_message.rb'
 require 'ninja_blocks'
@@ -58,6 +58,8 @@ class CloudListener
     puts "run"
     @worker = RzmqBrokers::Worker::Worker.new(@worker_config)
     @client = RzmqBrokers::Client::Client.new(@client_config)
+    # testing only
+    @serial.add_monitor(1, 60)
     ctx = ZM::Reactor.new.run do |context|
       @serial = SerialListener.new(context, [5556], self, '')
       context.sub_socket @serial    
