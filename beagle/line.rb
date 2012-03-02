@@ -6,12 +6,14 @@
 
 class Line
   LIMIT = 2
-  def initialize(line_id)
+  def initialize(line_id, identity)
     @line_id = line_id.to_i
+    @identity = identity
     @monitors = []
     @changed = 0
     @accessory = nil
     @new_accessory = nil
+    
   end
   
   def add_monitor(monitor)
@@ -51,7 +53,11 @@ class Line
     @monitors.reject! do |monitor|
       value = chunk["value"]
       type = chunk['type'].downcase # should this matter at this point?
-      extras = { :line => @line_id, :port_type => @accessory}
+      extras = {
+        :time => Time.now.to_s,
+        :line => @line_id,
+        :port_type => @accessory
+      }
       if type == monitor.channel
         monitor.last?(value) do |message|
           message.data.merge!(extras)

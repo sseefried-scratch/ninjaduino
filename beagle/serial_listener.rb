@@ -8,11 +8,12 @@ load './monitor.rb'
 
 class SerialListener
   attr_reader :topics
-  def initialize context, ports, client, cloud, topic = nil
+  def initialize context, ports, client, cloud, identity topic = nil
     @context = context
     @ports = ports # typically just one
     @client = client
     @cloud = cloud
+    @identity = identity
     (@topics ||= []) << topic.to_s
     @lines = []
   end
@@ -34,7 +35,7 @@ class SerialListener
   # should probably be merged with add_trigger
   def add_monitor(line, monitor)
     # monitor the line, send to port_watcher constantly.
-    @lines[line] ||= Line.new line
+    @lines[line] ||= Line.new line, @identity
     @lines[line].add_monitor(monitor)
   end
   
