@@ -50,7 +50,7 @@ class Line
     
     @monitors.reject! do |monitor|
       value = chunk["value"]
-      type = chunk['type'] # should this matter at this point?
+      type = chunk['type'].downcase # should this matter at this point?
       
       if type == monitor.channel
         monitor.last?(value) do |message|

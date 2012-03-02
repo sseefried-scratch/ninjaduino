@@ -52,7 +52,7 @@ class SerialListener
       puts "Data is #{data.inspect}"
       data['ports'].each do |chunk|
         k = chunk['port']
-        type = chunk['type']
+        type = chunk['type'].downcase
         puts "Chunk is #{chunk.inspect}"
         puts "#{k}:#{type}"
         line = (@lines[k] ||= Line.new k)
