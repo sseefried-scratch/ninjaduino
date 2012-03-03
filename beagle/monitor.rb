@@ -1,7 +1,8 @@
 class Monitor
   attr_reader :channel
-  
+  PER_SECOND = 4
   def initialize(timeout)
+    @next_send = Time.now + 1 / PER_SECOND
     @deadline = Time.now + timeout
     @channel = nil
   end
@@ -24,19 +25,23 @@ class Monitor
   end
   
   def last?(value)
-    return true if  @deadline < Time.now
+    now = Time.now
+    return true if  @deadline < now
     # send an update
-    puts "sending a monitor update: #{value}"
-    req = NinjaBlocks::LookupRequest.new do
-      service_name "port_watcher"
-      rule_id 0
-      message_type "do"
-      entity_type "action"
-      name "monitor"      
-      data({ :value => value })
+    if @next_send > now
+      puts "sending a monitor update: #{value}"
+      req = NinjaBlocks::LookupRequest.new do
+        service_name "port_watcher"
+        rule_id 0
+        message_type "do"
+        entity_type "action"
+        name "monitor"      
+        data({ :value => value })
+      end
+      yield req
+      return false
+      @next_send = now
     end
-    yield req
-    return false
   end
   
 end
