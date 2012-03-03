@@ -55,7 +55,7 @@ class SerialListener
         k = chunk['port']
         type = chunk['type'].downcase
         line = (@lines[k] ||= Line.new k, @identity)
-        line.portchanged?(type) # this lets the accessories know
+        @cloud.handle_portchange(k,type) if line.portchanged?(type) # this lets the accessories know
         line.update(chunk,@client)
       end 
     end
