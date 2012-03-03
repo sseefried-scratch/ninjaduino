@@ -8,7 +8,7 @@ load './monitor.rb'
 
 class SerialListener
   attr_reader :topics
-  def initialize context, ports, client, cloud, identity topic = nil
+  def initialize context, ports, client, cloud, identity, topic = nil
     @context = context
     @ports = ports # typically just one
     @client = client

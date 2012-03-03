@@ -21,7 +21,7 @@ class Line
   end
 
   def remove_monitor(rule_id)
-    @monitors.delete{|trigger| trigger.rule_id == rule_id}
+    @monitors.delete{|monitor| monitor.rule_id == rule_id}
   end
 
   def portchanged?(accessory_type)
