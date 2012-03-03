@@ -3,7 +3,8 @@ require 'zmqmachine'
 
 load './cloud_listener.rb'
 
-broker = "tcp://au.ninjablocks.com:5773"
+# broker = "tcp://au.ninjablocks.com:5773"
+broker = "tcp://192.168.0.65:5773"
 
 master_context = ZMQ::Context.new
 log_transport = "inproc://reactor_log"

@@ -64,7 +64,7 @@ class CloudListener
       @serial = SerialListener.new(context, [5556], client, self, identity, '')
       # testing only
 
-      # @serial.add_monitor(1, Monitor.new(60, "distance"))
+      @serial.add_monitor(1, Monitor.new(60))
 
       context.sub_socket @serial    
     end
