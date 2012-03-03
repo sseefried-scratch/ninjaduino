@@ -25,10 +25,14 @@ class Monitor
   end
   
   def last?(value)
+    puts "last? for monitor #{self.inspect}"
     now = Time.now
-    return true if  @deadline < now
+    if @deadline < now
+      puts "expiring monitor #{self.inspect}"
+      return true if  @deadline < now
+    end
     # send an update
-    if @next_send > now
+    if @next_send < now
       puts "sending a monitor update: #{value}"
       req = NinjaBlocks::LookupRequest.new do
         service_name "port_watcher"

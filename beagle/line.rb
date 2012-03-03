@@ -57,7 +57,8 @@ class Line
       extras = {
         :time => Time.now.to_s,
         :line => @line_id,
-        :port_type => @accessory
+        :port_type => @accessory,
+        :block => @identity
       }
       if type == monitor.channel
         monitor.last?(value) do |message|
