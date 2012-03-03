@@ -17,6 +17,7 @@ class Line
   end
   
   def add_monitor(monitor)
+    monitor.current_accessory = @accessory
     @monitors << monitor
   end
 
@@ -64,7 +65,7 @@ class Line
           client.process_request message
         end
       else
-        puts "#{monitor.channel} registered, but #{type} attached"
+        puts "#{monitor.inspect}: #{monitor.channel} registered, but #{type} attached"
         false
       end
     end
