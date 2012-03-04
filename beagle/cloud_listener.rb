@@ -4,6 +4,7 @@ require 'rubygems'
 require 'uuid'
 # load 'ninja_message.rb'
 require 'ninja_blocks'
+load 'trigger.rb'
 load 'serial_listener.rb'
 require 'rzmq_brokers'
 
@@ -97,6 +98,7 @@ class CloudListener
   def add_trigger(request, response)
     # stop ignoring stuff coming in
     trigger = Trigger.new(request.data.fetch('service'),
+                          request.data.fetch('trigger_channel'),
                           request.rule_id,
                           request.data.fetch('action'),
                           request.data['reset_level'],

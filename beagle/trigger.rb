@@ -5,10 +5,12 @@
 class Trigger
 
   CHANNEL_DEFAULTS={
-    "button" => { 'reset_level' => 10, 'trigger_level' => 1000 }
+    "button" => { 'reset_level' => 10, 'trigger_level' => 1000 },
+    "light"  => { 'reset_level' => 50, 'trigger_level' => 60 } 
   }
   attr_reader :channel, :enabled
-  def initialize(channel,
+  def initialize(channel, # action channel
+                 trigger_channel,
                  rule_id,
                  action,
                  reset_level=nil,
@@ -17,16 +19,18 @@ class Trigger
     # if reset_level is higher than the trigger level, then
     # that means we're approaching the trigger from above - ie,
     # trigger if temperature goes _below_ X.
-    defaults = CHANNEL_DEFAULTS[channel] || {}
+    
+    defaults = CHANNEL_DEFAULTS[trigger_channel] || {}
     @reset_level = reset_level || defaults['reset_level']
     @trigger_level = trigger_level || defaults['trigger_level']
     @transformer = defaults['transformer'] || lambda{|x|x}
 
-    @channel = channel
+    @channel = trigger_channel
     @enabled = true
     @fired = false
     @comparator = @reset_level > @trigger_level ? lambda {|x,y| x < y}
                                                 : lambda {|x,y| x > y}
+    @action_channel = channel
     @action = action
   end
 
@@ -34,13 +38,14 @@ class Trigger
     if fire?(value)
       rule_id = @rule_id
       action = @action
+      action_channel = @action_channel  
       req = NinjaBlocks::LookupRequest.new do
-        service_name channel
+        service_name action_channel
         rule_id rule_id
         message_type "do"
         entity_type "action"
         name action
-        data({})
+        data({:value => value})
       end
       yield req
     end
