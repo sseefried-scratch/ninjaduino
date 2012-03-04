@@ -2,6 +2,7 @@
 # arguably should be a library module - something that just provides
 # some sane defaults for the broker.
 require 'rzmq_brokers'
+require 'ninja_blocks'
 module Ninja
 class ZmqChannel
   def initialize(master_context, broker, log_transport, channel, reactor)
@@ -134,7 +135,7 @@ class ZmqChannel
       puts "#{@channel} can't handle #{methodname}"
       result = nil
     else
-      result = @channel.send methodname, request.data
+      result = @channel.send methodname, request.data, request.rule_id
     end
     
     response.answer result
