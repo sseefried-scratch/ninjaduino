@@ -1,4 +1,7 @@
-BROKER='tcp://au.ninjablocks.com:5773'
+# BROKER='tcp://au.ninjablocks.com:5773'
+BROKER='tcp://launch.ninjablocks.com:5773'
+#BROKER='tcp://127.0.0.1:5773'
+# BROKER='tcp://10.10.50.102:5773'
 require 'ffi-rzmq'
 require 'zmqmachine'
 # load 'twitter_chan.rb'
