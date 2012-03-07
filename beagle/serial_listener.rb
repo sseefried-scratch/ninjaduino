@@ -39,8 +39,9 @@ class SerialListener
     @lines[line].add_monitor(monitor)
   end
   
-  def remove_trigger(line, rule_id)
-    @lines[line].try(:remove_monitor, rule_id)
+  def remove_trigger(line_id, rule_id)
+    line=@lines[line_id]
+    line && line.remove_monitor(rule_id)
   end
   
   def on_readable socket, messages
