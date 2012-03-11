@@ -84,6 +84,7 @@ void line_listener(int line_id, void * subscriber, config_t* config) {
       chan = zmsg_pop(msg);
       if (zframe_streq(chan, channel_memory.current_channel)) {
         void * pipe = zthread_fork(config->context, watch_port, (void*)config);
+        s_send(pipe, channel_memory.current_channel);
         char * ok = s_recv(pipe);
         assert(strcmp(ok, "ok") == 0);
         free(ok);
