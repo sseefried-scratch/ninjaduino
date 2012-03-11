@@ -21,14 +21,14 @@ class CloudListener
     @worker_config = RzmqBrokers::Worker::Configuration.new do
       name identity
       exception_handler nil
-      poll_interval 250
+      poll_interval 2000
       context master_context
       log_endpoint log_transport
 
       endpoint broker
       connect  true
       service_name  identity
-      heartbeat_interval 3_000
+      heartbeat_interval 10000
       heartbeat_retries 3
       on_request  req_method
       on_disconnect dis_method
