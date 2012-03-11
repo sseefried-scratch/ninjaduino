@@ -75,11 +75,9 @@ void line_listener(int line_id, void * subscriber, config_t* config) {
       zmsg_destroy(&msg);
       break;
     case MONITOR_ON:
-      // what's in a monitor? hrm. TODO
-      // create a pthread, wait till we've synchronised
-      // while it's a bit annoying to be paused, if we don't then we
-      // might miss a channel change event, and the monitor will
-      // keep blithely sending garbage.
+      // create a pthread, wait till we've synchronised. 
+      // delaying main thread while syncing is overhead but
+      // acceptable, and necessary for correctness.
       
       chan = zmsg_pop(msg);
       if (zframe_streq(chan, channel_memory.current_channel)) {
@@ -92,14 +90,21 @@ void line_listener(int line_id, void * subscriber, config_t* config) {
         zclock_log("ignoring request for monitor: wrong channel requested");
       }
       
-      
+      break;
     case MONITOR_OFF: 
       s_send(monitor_controller, "CLEAR_MONITORS");
       break;
     case TRIGGER_ON: 
       // create a pthread, wait till we've synchronised,
       // pass it whatever it needs. TODO
-
+      void * pipe = zthread_fork(config->context, trigger, (void*)config);
+      s_send(pipe, channel_memory.current_channel);
+      // TODO what else does a channel need?
+      char * ok = s_recv(pipe);
+      assert(strcmp(ok, "ok") == 0);
+      free(ok);
+      zsocket_destroy(pipe);
+      break;
     case TRIGGER_OFF:
       rule_id = zmsg_popstr(msg);
       s_sendmore(monitor_controller, "CLEAR_TRIGGER");
