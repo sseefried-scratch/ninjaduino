@@ -1,5 +1,5 @@
 # define the C source files
-SRCS = main.c filter.c serial_relay.c cJSON.c line.c 
+SRCS = main.c filter.c serial_relay.c cJSON.c line.c  monitor.c
 
 # define the C object files 
 #
@@ -23,13 +23,15 @@ CFLAGS=-g -Wall
                 -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $*.P; \
             rm -f $*.d
 
-all: test driver
+all:  driver
 
-test: test_filter
+# test: test_filter
 test_vector: test_vector.o vector.o
 
-test_filter: test_filter.o filter.o cJSON.o line.o
-	gcc -o test_filter filter.o test_filter.o cJSON.o line.o -lzmq -lczmq 
+# test_filter: test_filter.o filter.o cJSON.o line.o
+#	gcc -o test_filter filter.o test_filter.o cJSON.o line.o -lzmq
+#	-lczmq 
+
 driver: $(OBJS)
 	gcc -o driver $(OBJS) -lzmq -lczmq
 

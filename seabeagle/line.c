@@ -38,20 +38,20 @@ void line_listener(int line_id, void * subscriber, config_t* config) {
   zmsg_t * msg;
   // realloc when you get more.
   int monitor_size = 0;
-  //monitor_t * monitors = NULL;
   int confirmed_rounds = 0;
   channel_memory_t channel_memory = { NULL, NULL, 0 };
   void * monitor_controller = zsocket_new(config->context, ZMQ_PUB);
   zsocket_bind(monitor_controller, "inproc://monitor_controller");
   //  int trigger_capacity = 1;
-  // monitor_t * monitors = malloc(1*sizeof(monitor_t));
+
 
   while(1) {
     int i;
+    zframe_t * chan;
     char * rule_id;
     msg = zmsg_recv(subscriber);
     zframe_t * cmd = zmsg_pop(msg);
-    
+
     switch((line_message_type_t)zframe_data(cmd)) {
       /* on an update, we check the monitors and triggers *
        * a trigger may fire, a monitor may be on.         *
@@ -63,12 +63,11 @@ void line_listener(int line_id, void * subscriber, config_t* config) {
       
       zframe_t * channel = zmsg_pop(msg);
       if (port_changed(channel, &channel_memory)) {
-        s_send_more(monitor_controller, "CHANNEL_CHANGE");
+        s_sendmore(monitor_controller, "CHANNEL_CHANGE");
         s_send(monitor_controller, channel_memory.current_channel);
       } else {
         char * value = zmsg_popstr(msg);
-        s_send_more(monitor_controller, "VALUE");
-        // s_send_more(monitor_controller, channel_memory.current_channel);
+        s_sendmore(monitor_controller, "VALUE");
         s_send(monitor_controller, value);
         free(value);
       }
@@ -81,7 +80,17 @@ void line_listener(int line_id, void * subscriber, config_t* config) {
       // while it's a bit annoying to be paused, if we don't then we
       // might miss a channel change event, and the monitor will
       // keep blithely sending garbage.
-
+      
+      chan = zmsg_pop(msg);
+      if (zframe_streq(chan, channel_memory.current_channel)) {
+        void * pipe = zthread_fork(config->context, watch_port, (void*)config);
+        char * ok = s_recv(pipe);
+        assert(strcmp(ok, "ok") == 0);
+        free(ok);
+      } else {
+        zclock_log("ignoring request for monitor: wrong channel requested");
+      }
+      
       
     case MONITOR_OFF: 
       s_send(monitor_controller, "CLEAR_MONITORS");
@@ -92,7 +101,7 @@ void line_listener(int line_id, void * subscriber, config_t* config) {
 
     case TRIGGER_OFF:
       rule_id = zmsg_popstr(msg);
-      s_send_more(monitor_controller, "CLEAR_TRIGGER");
+      s_sendmore(monitor_controller, "CLEAR_TRIGGER");
       s_send(monitor_controller, rule_id);
       free(rule_id);
       break;
