@@ -1,6 +1,7 @@
 #include "serial_relay.h"
 #include <zmq.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include "config.h"
 #include "filter.h"

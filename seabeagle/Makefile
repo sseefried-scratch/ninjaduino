@@ -11,7 +11,7 @@ SRCS = main.c filter.c serial_relay.c cJSON.c line.c  monitor.c
 #
 OBJS = $(SRCS:.c=.o)
 #CFLAGS=-std=c99
-CFLAGS=-g -Wall
+CFLAGS=-g -Wall -Wno-unused-function
 
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
