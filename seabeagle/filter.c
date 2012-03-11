@@ -2,8 +2,9 @@
 #include "cJSON.h"
 #include "zhelpers.h"
 #include "filter.h"
+#include "config.h"
 
-void setup_line(line_t * lines, int i, char * identity, char * remote, void * context){
+void setup_line(line_t * lines, int i, config_t * config) {
   // do we need to realloc lines? let''s assume not - set MAXLINES for
   // now.
   
@@ -18,13 +19,13 @@ void setup_line(line_t * lines, int i, char * identity, char * remote, void * co
     line->pid = line_pid;
     // what's the protocol here? does the line ever talk back?
     // say no for the moment...
-    line->socket = zmq_socket(context, ZMQ_PUB); 
-    zmq_connect(line->socket, endpoint);
+    line->socket = zmq_socket(config->context, ZMQ_PUB); 
+    zmq_connect(line->socket, config->broker_endpoint);
     // and returns.
   } else {
-    void * line_sock = zmq_socket(context, ZMQ_SUB);
+    void * line_sock = zmq_socket(config->context, ZMQ_SUB);
     zmq_bind(line_sock, endpoint);
-    line_listener(i, line_sock, identity, remote);
+    line_listener(i, line_sock, config);
     // only returns on shutdown. not sure why it would, but
     // let's be safe.
     zmq_close(line_sock);
@@ -34,7 +35,7 @@ void setup_line(line_t * lines, int i, char * identity, char * remote, void * co
 
 int MAXLINES=20;
 
-void filter(void* context, void * serial, char * identity, char * remote) {
+void filter(void * serial, config_t * config) {
   // zmq_pollitem_t  * items = malloc(1 * sizeof(zmq_pollitem_t));
   zmq_setsockopt (serial, ZMQ_SUBSCRIBE, "", 1);
   zmq_msg_t msg;
@@ -63,7 +64,7 @@ void filter(void* context, void * serial, char * identity, char * remote) {
       // this is pretty sketchy, but how else do we indicate that
       // the line hasn't been initialised yet?
       if (lines[i].pid==0){
-        setup_line(lines, i, identity, remote, context);
+        setup_line(lines, i, config);
       }
       void * sock = lines[i].socket;
       s_sendmore(sock, SERIAL_UPDATE);

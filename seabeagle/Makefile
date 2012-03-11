@@ -26,9 +26,10 @@ CFLAGS=-g -Wall
 all: test driver
 
 test: test_filter
+test_vector: test_vector.o vector.o
 
 test_filter: test_filter.o filter.o cJSON.o line.o
-	gcc -o test_filter filter.o test_filter.o cJSON.o line.o -lzmq -lczmq
+	gcc -o test_filter filter.o test_filter.o cJSON.o line.o -lzmq -lczmq 
 driver: $(OBJS)
 	gcc -o driver $(OBJS) -lzmq -lczmq
 
