@@ -11,9 +11,10 @@ typedef struct {
 } monitor_t;
 */
 
-void watch_port(config_t *config, 
+void watch_port(void *cvoid, 
                 zctx_t * context, void * pipe ) {
   zclock_log("watch_port started!");
+  config_t * config = (config_t*) cvoid;
   // sort out comms with the overlord first
   char * channel = s_recv(pipe);
   

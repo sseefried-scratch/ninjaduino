@@ -2,6 +2,7 @@
 #include "zhelpers.h"
 #include "czmq.h"
 #include "monitor.h"
+#include "trigger.h"
 
 int LIMIT = 3;
 typedef struct {
@@ -97,14 +98,16 @@ void line_listener(int line_id, void * subscriber, config_t* config) {
     case TRIGGER_ON: 
       // create a pthread, wait till we've synchronised,
       // pass it whatever it needs. TODO
-      void * pipe = zthread_fork(config->context, trigger, (void*)config);
-      s_send(pipe, channel_memory.current_channel);
-      // TODO what else does a channel need?
-      char * ok = s_recv(pipe);
-      assert(strcmp(ok, "ok") == 0);
-      free(ok);
-      zsocket_destroy(pipe);
-      break;
+      {
+        void * pipe = zthread_fork(config->context, trigger, (void*)config);
+        s_send(pipe, channel_memory.current_channel);
+        // TODO what else does a channel need?
+        char * ok = s_recv(pipe);
+        assert(strcmp(ok, "ok") == 0);
+        free(ok);
+        zsocket_destroy(config->context, pipe);
+        break;
+      }
     case TRIGGER_OFF:
       rule_id = zmsg_popstr(msg);
       s_sendmore(monitor_controller, "CLEAR_TRIGGER");

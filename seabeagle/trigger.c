@@ -2,7 +2,7 @@
 #include "monitor.h"
 #include "config.h"
 #include "czmq.h"
-
+#include "trigger.h"
 /*
 typedef struct {
   int next_send;
@@ -11,10 +11,11 @@ typedef struct {
 } monitor_t;
 */
 
-void trigger(config_t *config, 
+void trigger(void *cvoid, 
              zctx_t * context, 
              void * pipe ) {
   zclock_log("watch_port started!");
+  config_t * config = (config_t*) cvoid;
   // sort out comms with the overlord first
   char * channel = s_recv(pipe);
   //TODO receive all other necessary information
