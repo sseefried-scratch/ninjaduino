@@ -55,6 +55,10 @@ class SerialListener
       data['ports'].each do |chunk|
         k = chunk['port']
         type = chunk['type'].downcase
+        # bad reading from arduino
+        if type == "pir"
+          type = "unknown"
+        end
         line = (@lines[k] ||= Line.new k, @identity)
         @cloud.handle_portchange(k,type) if line.portchanged?(type) # this lets the accessories know
         line.update(chunk,@client)
