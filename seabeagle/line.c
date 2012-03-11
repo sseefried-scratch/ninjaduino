@@ -36,18 +36,19 @@ int port_changed(zframe_t * channel, channel_memory_t * m) {
 void line_listener(int line_id, void * subscriber, config_t* config) {
   char * str;
   zmsg_t * msg;
-  void * portwatcher = NULL; // don't connect the socket until we need it.
   // realloc when you get more.
   int monitor_size = 0;
   //monitor_t * monitors = NULL;
   int confirmed_rounds = 0;
   channel_memory_t channel_memory = { NULL, NULL, 0 };
-  void * monitor_controller;
+  void * monitor_controller = zsocket_new(config->context, ZMQ_PUB);
+  zsocket_bind(monitor_controller, "inproc://monitor_controller");
   //  int trigger_capacity = 1;
   // monitor_t * monitors = malloc(1*sizeof(monitor_t));
 
   while(1) {
     int i;
+    char * rule_id;
     msg = zmsg_recv(subscriber);
     zframe_t * cmd = zmsg_pop(msg);
     
@@ -62,45 +63,38 @@ void line_listener(int line_id, void * subscriber, config_t* config) {
       
       zframe_t * channel = zmsg_pop(msg);
       if (port_changed(channel, &channel_memory)) {
-        s_send(monitor_controller, "CHANNELCHANGE");
+        s_send_more(monitor_controller, "CHANNEL_CHANGE");
+        s_send(monitor_controller, channel_memory.current_channel);
       } else {
         char * value = zmsg_popstr(msg);
         s_send_more(monitor_controller, "VALUE");
-        s_send_more(monitor_controller, channel_memory.current_channel);
+        // s_send_more(monitor_controller, channel_memory.current_channel);
         s_send(monitor_controller, value);
-
-        // send to triggers too? or can they listen on the same port?
-      }
-        // check we have a connection
-        if (monitor_size > 0) {
-          if (!portwatcher) {
-            portwatcher = zsocket_new(config->context, ZMQ_PUB);
-            zmq_connect(portwatcher, config->portwatcher_endpoint);
-          }
-          char * channel_name = zframe_strdup(channel);
-
-          // fire all existing monitors
-          for(i=0;i<monitor_size;i++) {
-            if (fire_monitor(&monitors[i])) {
-              zmsg_t * notification = zmsg_new();
-              zmsg_pushstr(notification, config->identity);
-              zmsg_pushstr(notification, channel_name);
-              zmsg_pushstr(notification, value);
-              zmsg_send(&notification, portwatcher); // also destroys msg
-            }
-          }
-          free(value);
-          free(channel_name);
-        }
+        free(value);
       }
       zframe_destroy(&channel);
       zmsg_destroy(&msg);
       break;
     case MONITOR_ON:
       // what's in a monitor? hrm. TODO
-    case MONITOR_OFF: break; // not used yet
-    case TRIGGER_ON: // TODO
-    case TRIGGER_OFF: // TODO
+      // create a pthread, wait till we've synchronised
+      // while it's a bit annoying to be paused, if we don't then we
+      // might miss a channel change event, and the monitor will
+      // keep blithely sending garbage.
+
+      
+    case MONITOR_OFF: 
+      s_send(monitor_controller, "CLEAR_MONITORS");
+      break;
+    case TRIGGER_ON: 
+      // create a pthread, wait till we've synchronised,
+      // pass it whatever it needs. TODO
+
+    case TRIGGER_OFF:
+      rule_id = zmsg_popstr(msg);
+      s_send_more(monitor_controller, "CLEAR_TRIGGER");
+      s_send(monitor_controller, rule_id);
+      free(rule_id);
       break;
     default:
       str = zframe_strdup(cmd);
