@@ -8,7 +8,7 @@ class Trigger
     "button" => { 'reset_level' => 10, 'trigger_level' => 1000 },
     "light"  => { 'reset_level' => 50, 'trigger_level' => 60 } 
   }
-  attr_reader :channel, :enabled
+  attr_reader :channel, :enabled,:rule_id
   def initialize(channel, # action channel
                  trigger_channel,
                  rule_id,
