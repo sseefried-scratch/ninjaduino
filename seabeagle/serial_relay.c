@@ -28,7 +28,7 @@ void read_serial(void * cvoid, zctx_t * context, void * pipe) {
 #endif
     zmsg_t * msg = zmsg_new();
     zmsg_pushstr(msg, buf); // does buf need to be copied?
-    zmsg_send(socket, msg);
+    zmsg_send(&msg, socket);
   }
   fprintf(stderr, "error reading from stdin\n");
   zsocket_destroy(context, socket);

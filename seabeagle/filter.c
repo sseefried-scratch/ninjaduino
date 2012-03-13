@@ -53,7 +53,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       zmsg_pushstr(out, value); 
       zmsg_pushstr(out, type);
       zmsg_pushstr(out,line);
-      zmsg_send(events, out);
+      zmsg_send(&out, events);
 
       port = port->next;
     }

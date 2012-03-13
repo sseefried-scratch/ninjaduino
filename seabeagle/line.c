@@ -89,7 +89,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
     if (port_changed(channel, &channel_memory)) {
       zmsg_pushstr(out, channel_memory.current_channel);
       zmsg_pushstr(out, "CHANNEL_CHANGE");
-      zmsg_send(lineout, out);
+      zmsg_send(&out, lineout);
     } else {
       zmsg_push(out, zmsg_pop(msg));
       zmsg_pushstr(out, "VALUE");
