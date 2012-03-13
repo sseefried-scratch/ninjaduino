@@ -34,11 +34,11 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
     for(i=1; port; i++) {
       char line[16];
       char * type = cJSON_GetObjectItem(port, "type")->valuestring;
-      printf("type is %s\n", type);
+      zclock_log("filter\ntype is %s\n", type);
       assert(type);
       // this may be dodgy: some values may be structured.
       int value = cJSON_GetObjectItem(port, "value")->valueint;
-      printf("value is %d\n", value);
+      zclock_log("filter\nvalue is %d\n", value);
       assert(value >= 0);
       assert(value <= 1024);
       // this is pretty sketchy, but how else do we indicate that

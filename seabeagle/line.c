@@ -49,11 +49,8 @@ int port_changed(zframe_t * channel, channel_memory_t * m) {
 }
 
 void dump_lineconfig(lineconfig_t * c) {
-  char buf[1024];
-  sprintf(buf, "LINE CONFIG\ninpipe: %s\noutpipe:%s\ntopic:%s\n",
-          c->inpipe, c->outpipe, c->topic);
-
-  zclock_log(buf);
+  zclock_log("LINE CONFIG\ninpipe: %s\noutpipe:%s\ntopic:%s\n",
+             c->inpipe, c->outpipe, c->topic);
 }
 
 void line_listener(void * cvoid, zctx_t * context, void * pipe) {

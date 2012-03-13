@@ -30,10 +30,8 @@ __________________
 */
 
 void dump_monitorconfig(monitorconfig_t * c) {
-  char buf[1024];
-  sprintf(buf, "source: %s\nline:%d\nlistener:%s\nout:%s\nchannel:%s",
+  zclock_log("source: %s\nline:%d\nlistener:%s\nout:%s\nchannel:%s",
           c->source_worker, c->line_id, c->listen_socket, c->out_socket, c->channel);
-  zclock_log(buf);
 }
 
 void watch_port(void *cvoid, 
