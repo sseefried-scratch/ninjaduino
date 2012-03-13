@@ -81,6 +81,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   while(1) {
     msg = zmsg_recv(subscriber);
     zframe_t * recv_topic = zmsg_pop(msg);
+    zclock_log(zframe_strdup(recv_topic));
     assert(zframe_streq(recv_topic, config->topic));
     zframe_destroy(&recv_topic);
     /* zframe_t * cmd = zmsg_pop(msg); */
