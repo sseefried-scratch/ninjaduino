@@ -23,7 +23,8 @@ int main() {
    *  inproc socket. This could be done inline, but now we can test
    *  these separately
    */
-  void * serial_pipe = zthread_fork(context, read_serial, (void *) stdin);
+  serialconfig_t sconfig = { stdin };
+  void * serial_pipe = zthread_fork(context, read_serial, (void *) &sconfig);
   parent_handshake(serial_pipe);
   void * filter_pipe = zthread_fork(context, line_dispatcher, NULL);
   parent_handshake(filter_pipe);
