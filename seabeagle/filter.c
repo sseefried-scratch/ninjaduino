@@ -33,6 +33,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
     free(data);
     if (!root) {
       // our feed is not clean json.
+      zmsg_destroy(&msg);
       continue;
     }
     cJSON * port = cJSON_GetObjectItem(root, "ports")->child;
