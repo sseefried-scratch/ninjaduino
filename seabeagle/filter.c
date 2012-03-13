@@ -1,6 +1,5 @@
 #include "line.h"
 #include "cJSON.h"
-#include "zhelpers.h"
 #include "filter.h"
 #include "config.h"
 #include <czmq.h>
@@ -49,10 +48,13 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
         zsocket_destroy(context, pipe);
         lines |=  0x1<<(i-1) ;
       }
+      zmsg_t * out = zmsg_new();
+      // value needs to be an int here FIX
+      zmsg_pushstr(out, value); 
+      zmsg_pushstr(out, type);
+      zmsg_pushstr(out,line);
+      zmsg_send(events, out);
 
-      s_sendmore(events, line);
-      s_sendmore(events, type);
-      s_send(events, value);
       port = port->next;
     }
     cJSON_Delete(root);

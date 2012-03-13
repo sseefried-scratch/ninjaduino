@@ -1,12 +1,13 @@
 #include "serial_relay.h"
 #include <zmq.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <stdio.h>
+// #include <unistd.h>
+// #include <sys/wait.h>
+// #include <stdio.h>
 #include "config.h"
 #include "filter.h"
 #include "utils.h"
+#include "worker.h"
 
 int main() {
 
@@ -24,8 +25,11 @@ int main() {
    */
   void * serial_pipe = zthread_fork(context, read_serial, (void *) stdin);
   parent_handshake(serial_pipe);
-  void * filter_pipe = zthread_fork(context, line_dispatcher, (void *) &config);
+  void * filter_pipe = zthread_fork(context, line_dispatcher, NULL);
   parent_handshake(filter_pipe);
+  void * worker_pipe = zthread_fork(context, worker, (void *) &config);
+  parent_handshake(worker_pipe);
+
   // FIX do we have to wait for the child threads to finish?
 
   exit(0);

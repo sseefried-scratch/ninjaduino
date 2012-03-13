@@ -1,8 +1,8 @@
 #include "line.h"
-#include "zhelpers.h"
 #include "czmq.h"
 #include "monitor.h"
 #include "trigger.h"
+#include "utils.h"
 
 
 /* 
@@ -58,20 +58,18 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   //  zsocket_bind(monitor_controller, "inproc://monitor_controller");
   //  int trigger_capacity = 1;
   
-  char * topic = s_recv(pipe); // something like line0003
-  char * endpoint = "inproc://lineXXXX";
-  sprintf(endpoint, "inproc://%s", topic);
   void * lineout = zsocket_new(context, ZMQ_PUB);
   zsocket_bind(lineout, config->outpipe);
 
   void * subscriber = zsocket_new(context, ZMQ_SUB);
   zsocket_connect(subscriber, "inproc://serial_events");
-  zsockopt_set_subscribe(subscriber, topic);
-  s_send(pipe, "ok");
+  zsockopt_set_subscribe(subscriber, config->topic);
+  child_handshake(pipe);
+  zsocket_destroy(context, pipe);
   while(1) {
     msg = zmsg_recv(subscriber);
     zframe_t * recv_topic = zmsg_pop(msg);
-    assert(zframe_streq(recv_topic, topic));
+    assert(zframe_streq(recv_topic, config->topic));
     zframe_destroy(&recv_topic);
     /* zframe_t * cmd = zmsg_pop(msg); */
 

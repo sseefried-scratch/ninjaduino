@@ -1,5 +1,5 @@
 # define the C source files
-SRCS = main.c filter.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.c
+SRCS = main.c filter.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.c worker.c
 
 # define the C object files 
 #
@@ -11,7 +11,7 @@ SRCS = main.c filter.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.
 #
 OBJS = $(SRCS:.c=.o)
 #CFLAGS=-std=c99
-CFLAGS=-g -Wall -Wno-unused-function
+CFLAGS=-g -Wall
 
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@

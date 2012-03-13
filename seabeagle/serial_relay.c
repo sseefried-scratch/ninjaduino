@@ -1,7 +1,6 @@
-#include "zhelpers.h"
 #include <czmq.h>
-#include "utils.h"
 #include "serial_relay.h"
+#include "utils.h"
 
 void read_serial(void * cvoid, zctx_t * context, void * pipe) {
   char * buf;
@@ -22,7 +21,9 @@ void read_serial(void * cvoid, zctx_t * context, void * pipe) {
 #ifdef DEBUG
     puts(buf);
 #endif
-    s_send (socket, buf);
+    zmsg_t * msg = zmsg_new();
+    zmsg_pushstr(msg, buf); // does buf need to be copied?
+    zmsg_send(socket, msg);
   }
   fprintf(stderr, "error reading from stdin\n");
   zsocket_destroy(context, socket);

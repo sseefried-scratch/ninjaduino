@@ -11,6 +11,7 @@
 typedef struct {
   char * inpipe;
   char * outpipe;
+  char * topic;
 } lineconfig_t;
 
 typedef enum  { SERIAL_UPDATE, 
