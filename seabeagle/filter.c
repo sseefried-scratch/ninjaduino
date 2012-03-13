@@ -32,7 +32,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
     cJSON * port = cJSON_GetObjectItem(root, "ports")->child;
 
     for(i=1; port; i++) {
-      char * line = "lineXXXX";
+      char line[16];
       char * type = cJSON_GetObjectItem(port, "type")->valuestring;
       char * value = cJSON_GetObjectItem(port, "value")->valuestring;
       // this is pretty sketchy, but how else do we indicate that
