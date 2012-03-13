@@ -71,6 +71,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   zsocket_bind(lineout, outpipe);
 
   void * subscriber = zsocket_new(context, ZMQ_SUB);
+  zclock_log("subscribing to |%s|", config->topic);
   zsockopt_set_subscribe(subscriber, config->topic);
   zsocket_connect(subscriber, "inproc://serial_events");
 
