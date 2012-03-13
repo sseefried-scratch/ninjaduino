@@ -27,8 +27,8 @@ typedef struct {
 } channel_memory_t;
 
 int port_changed(char * channel, channel_memory_t * m) {
-  zclock_log("line\nchannel: %s\nchan_memory:%s\nnext_chan:%s",
-             channel, m->current_channel, m->next_channel);
+  // zclock_log("line\nchannel: %s\nchan_memory:%s\nnext_chan:%s",
+  //            channel, m->current_channel, m->next_channel);
   if (strcmp(channel, m->current_channel)==0) {
     return 0;
   }
