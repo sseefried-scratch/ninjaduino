@@ -58,6 +58,7 @@ void dump_lineconfig(lineconfig_t * c) {
 
 void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   lineconfig_t * config = (lineconfig_t*)  cvoid;
+  // atm, topic == outpipe, but this is coincidental...
   zmsg_t * msg;
   dump_lineconfig(config);
   channel_memory_t channel_memory = { NULL, NULL, 0 };

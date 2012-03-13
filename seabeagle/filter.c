@@ -43,6 +43,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
         lineconfig_t * lineconfig = malloc(sizeof(lineconfig_t));
         lineconfig->inpipe = "line";
         lineconfig->outpipe = strdup(line);
+        lineconfig->topic = lineconfig->outpipe; // I GUESS? TODO
         void * pipe = zthread_fork(context, line_listener, (void*)lineconfig);
         parent_handshake(pipe);
         zsocket_destroy(context, pipe);
