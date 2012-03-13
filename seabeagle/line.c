@@ -48,11 +48,18 @@ int port_changed(zframe_t * channel, channel_memory_t * m) {
   return 0;
 }
 
+void dump_lineconfig(lineconfig_t * c) {
+  char buf[1024];
+  sprintf(buf, "inpipe: %s\noutpipe:%s\ntopic:%s\n",
+          c->inpipe, c->outpipe, c->topic);
+
+  zclock_log(buf);
+}
 
 void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   lineconfig_t * config = (lineconfig_t*)  cvoid;
   zmsg_t * msg;
-
+  dump_lineconfig(config);
   channel_memory_t channel_memory = { NULL, NULL, 0 };
   // void * monitor_controller = zsocket_new(config->context, ZMQ_PUB);
   //  zsocket_bind(monitor_controller, "inproc://monitor_controller");
