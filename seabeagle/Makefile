@@ -1,5 +1,5 @@
 # define the C source files
-SRCS = main.c filter.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.c worker.c
+SRCS = main.c filter.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.c worker.c mdwrkapi.c
 
 # define the C object files 
 #

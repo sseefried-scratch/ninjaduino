@@ -87,6 +87,11 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   zsocket_destroy(context, pipe);
   while(1) {
     msg = zmsg_recv(subscriber);
+    if(!msg) {
+      zclock_log("line quitting!");
+      return;
+    }
+        
     // zmsg_dump(msg);
     char * recv_topic = zmsg_popstr(msg);
     // zclock_log("line got topic\nreceived: %s\nexpected: %s\n", recv_topic, config->topic);

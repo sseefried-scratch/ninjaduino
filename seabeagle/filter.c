@@ -14,18 +14,23 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
   zsocket_connect(serial, "inproc://raw_serial");
   // unnecessary: we start with an empty subscription.
   // zmq_setsockopt (serial, ZMQ_SUBSCRIBE, "", 1);
-  zmq_msg_t msg;
-  zmq_msg_init(&msg);
   int i;
   int lines = 0;
 
   void * events = zsocket_new(context, ZMQ_PUB);
   zsocket_bind(events, "inproc://serial_events");
   while(1) {
-    zmq_recv(serial, &msg, 0);
+    zmsg_t *msg = zmsg_recv(serial);
+    assert(zmsg_size(msg) == 1);
+    char * data = zmsg_popstr(msg);
+    if(!msg) {
+      zclock_log("line quitting!");
+      return;
+    }
     // ephemeral storage, but we'll copy what we want out of
     // the json sturcture.
-    cJSON * root = cJSON_Parse(zmq_msg_data(&msg));
+    cJSON * root = cJSON_Parse(data);
+    free(data);
     if (!root) {
       // our feed is not clean json.
       continue;
@@ -68,5 +73,6 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       port = port->next;
     }
     cJSON_Delete(root);
+    zmsg_destroy(&msg);
   }
 }
