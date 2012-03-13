@@ -50,7 +50,7 @@ int port_changed(zframe_t * channel, channel_memory_t * m) {
 
 void dump_lineconfig(lineconfig_t * c) {
   char buf[1024];
-  sprintf(buf, "inpipe: %s\noutpipe:%s\ntopic:%s\n",
+  sprintf(buf, "LINE CONFIG\ninpipe: %s\noutpipe:%s\ntopic:%s\n",
           c->inpipe, c->outpipe, c->topic);
 
   zclock_log(buf);
@@ -61,7 +61,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   // atm, topic == outpipe, but this is coincidental...
   zmsg_t * msg;
   dump_lineconfig(config);
-  channel_memory_t channel_memory = { NULL, NULL, 0 };
+  channel_memory_t channel_memory = { "UNKNOWN", "UNKNOWN", 0 };
   // void * monitor_controller = zsocket_new(config->context, ZMQ_PUB);
   //  zsocket_bind(monitor_controller, "inproc://monitor_controller");
   //  int trigger_capacity = 1;
