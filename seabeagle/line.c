@@ -61,7 +61,9 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   // atm, topic == outpipe, but this is coincidental...
   zmsg_t * msg;
   dump_lineconfig(config);
-  channel_memory_t channel_memory = { "UNKNOWN", "UNKNOWN", 0 };
+  channel_memory_t channel_memory = { strdup("UNKNOWN"),
+                                      strdup("UNKNOWN"),
+                                      0 };
   // void * monitor_controller = zsocket_new(config->context, ZMQ_PUB);
   //  zsocket_bind(monitor_controller, "inproc://monitor_controller");
   //  int trigger_capacity = 1;
