@@ -79,8 +79,8 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
     msg = zmsg_recv(subscriber);
     zmsg_dump(msg);
     char * recv_topic = zmsg_popstr(msg);
-    zclock_log("line got topic\nreceived: %s\n%expected: %s\n", recv_topic, config->topic);
-
+    zclock_log("line got topic\nreceived: %s\nexpected: %s\n", recv_topic, config->topic);
+    fflush(stdout);
     assert(strcmp(recv_topic, config->topic)==0);
     free(recv_topic);
     /* zframe_t * cmd = zmsg_pop(msg); */
