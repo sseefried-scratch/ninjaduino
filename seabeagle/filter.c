@@ -36,8 +36,9 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       char * type = cJSON_GetObjectItem(port, "type")->valuestring;
       printf("type is %s\n", type);
       assert(type);
-      char * value = cJSON_GetObjectItem(port, "value")->valuestring;
-      printf("value is %s\n", value);
+      // this may be dodgy: some values may be structured.
+      int value = cJSON_GetObjectItem(port, "value")->valueint;
+      printf("value is %d\n", value);
       assert(value);
       // this is pretty sketchy, but how else do we indicate that
       // the line hasn't been initialised yet?
