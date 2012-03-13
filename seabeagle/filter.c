@@ -12,6 +12,8 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
   // config_t * config = (config_t*) cvoid;
   void * serial = zsocket_new(context, ZMQ_SUB);
   zsocket_connect(serial, "inproc://raw_serial");
+  child_handshake(pipe);
+  zsocket_destroy(context, pipe);
   // unnecessary: we start with an empty subscription.
   // zmq_setsockopt (serial, ZMQ_SUBSCRIBE, "", 1);
   int i;
