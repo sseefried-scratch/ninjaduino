@@ -19,7 +19,7 @@ ________________
 |______________|
 */
 
-int LIMIT = 3;
+int LIMIT = 1;
 typedef struct {
   char * current_channel;
   char * next_channel;
