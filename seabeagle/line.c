@@ -32,7 +32,7 @@ int port_changed(char * channel, channel_memory_t * m) {
   if (strcmp(channel, m->current_channel)==0) {
     return 0;
   }
-  if (strcmp(channel, m->next_channel)==0) {
+  if(m->next_channel && strcmp(channel, m->next_channel)==0) {
     if(m->confirmed_rounds++ > LIMIT) {
       // time to change
       free(m->next_channel);
@@ -44,6 +44,7 @@ int port_changed(char * channel, channel_memory_t * m) {
     }
     return 0;
   }
+
   // new channel that we weren't expecting.
   free(m->next_channel);
   m->next_channel = strdup(channel);
