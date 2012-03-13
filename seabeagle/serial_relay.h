@@ -6,5 +6,6 @@
 typedef struct {
   FILE * in;
 } serialconfig_t;
+
 void read_serial(void * in, zctx_t * context, void * pipe) ;
 #endif

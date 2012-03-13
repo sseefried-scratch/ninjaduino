@@ -9,14 +9,15 @@ void child_handshake(void*pipe) {
   zframe_destroy(&ping);
   zmsg_t * out = zmsg_new();
   zmsg_pushstr(out, "pong");
+  zmsg_send(&out, pipe);
 }
 
 
 void parent_handshake(void*pipe) {
-  
+  assert(pipe);
   zmsg_t * out = zmsg_new();
   zmsg_pushstr(out, "ping");
-  zmsg_send(pipe,out);
+  zmsg_send(&out, pipe);
 
   zmsg_t * in = zmsg_recv(pipe);
   assert(zmsg_size(in) == 1);
