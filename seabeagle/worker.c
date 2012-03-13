@@ -1,7 +1,9 @@
 #include <czmq.h>
 #include "mdwrkapi.h"
+#include "utils.h"
 
 void worker(void * cvoid, zctx_t * context, void * pipe) {
+  child_handshake(pipe);
   mdwrk_t *session = mdwrk_new ("tcp://localhost:5555", "echo", 1);
   zmsg_t *reply = NULL;
   while (1) {
