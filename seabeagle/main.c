@@ -33,7 +33,8 @@ int main() {
   void * worker_pipe = zthread_fork(context, worker, (void *) &config);
   parent_handshake(worker_pipe);
   zclock_log("worker ended");
-  // FIX do we have to wait for the child threads to finish?
-  sleep(100);
+  // FIX We have to wait for the child threads to finish, but this
+  // can't be the best way.
+  while(1) sleep(100);
   exit(0);
 }
