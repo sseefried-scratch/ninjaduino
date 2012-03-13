@@ -20,6 +20,7 @@ void trigger(void *cvoid,
   void * control = zsocket_new(context, ZMQ_SUB);
   // think it should be possible to automatically ignore
   // everything we don't know about.
+  zsockopt_set_unsubscribe(control, "");
   zsockopt_set_subscribe(control, "CHANNEL_CHANGE");
   zsockopt_set_subscribe(control, "VALUE");
   zsocket_connect(context, "inproc://monitor_controller");

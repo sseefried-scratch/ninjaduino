@@ -43,6 +43,7 @@ void watch_port(void *cvoid,
 
   void * linein = zsocket_new(context, ZMQ_SUB);
   zsocket_connect(linein, config->listen_socket);
+  zsockopt_set_unsubscribe(linein, "");
   zsockopt_set_subscribe(linein, "CHANNEL_CHANGE");
   zsockopt_set_subscribe(linein, "CLEAR_MONITORS");
   zsockopt_set_subscribe(linein, "VALUE");
