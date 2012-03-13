@@ -26,25 +26,25 @@ typedef struct {
   int confirmed_rounds;
 } channel_memory_t;
 
-int port_changed(zframe_t * channel, channel_memory_t * m) {
-  if (zframe_streq(channel, m->current_channel)) {
+int port_changed(char * channel, channel_memory_t * m) {
+  if (strcmp(channel, m->current_channel)==0) {
     return 0;
   }
-  if (zframe_streq(channel, m->next_channel)) {
+  if (strcmp(channel, m->next_channel)==0) {
     if(m->confirmed_rounds++ > LIMIT) {
       // time to change
       free(m->next_channel);
       free(m->current_channel);
       m->next_channel = NULL;
       m->confirmed_rounds=0;
-      m->current_channel = zframe_strdup(channel);
+      m->current_channel = strdup(channel);
       return 1;
     }
     return 0;
   }
   // new channel that we weren't expecting.
   free(m->next_channel);
-  m->next_channel = zframe_strdup(channel);
+  m->next_channel = strdup(channel);
   return 0;
 }
 
@@ -99,7 +99,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
     /*   /\* expect to be sent two messages: value and type *\/ */
     assert(zmsg_size(msg) == 2);
       
-    zframe_t * channel = zmsg_pop(msg);
+    char * channel = zmsg_popstr(msg);
     zmsg_t * out = zmsg_new();
     if (port_changed(channel, &channel_memory)) {
       zmsg_pushstr(out, channel_memory.current_channel);
@@ -110,7 +110,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
       zmsg_pushstr(out, "VALUE");
 
     }
-    zframe_destroy(&channel);
+    free(channel);
     zmsg_destroy(&msg);
     
   }
