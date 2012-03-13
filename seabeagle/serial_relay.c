@@ -21,10 +21,10 @@ void read_serial(void * cvoid, zctx_t * context, void * pipe) {
   zsocket_bind(socket, "inproc://raw_serial");
   
   while ( getline(&buf, &nbytes, in) != -1 ) {
-
+#ifdef DEBUG
     puts("line:");
     puts(buf);
-#ifdef DEBUG
+
 #endif
     zmsg_t * msg = zmsg_new();
     zmsg_pushstr(msg, buf); // does buf need to be copied?
