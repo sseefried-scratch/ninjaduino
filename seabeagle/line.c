@@ -35,14 +35,18 @@ int port_changed(char * channel, channel_memory_t * m) {
   if(m->next_channel && strcmp(channel, m->next_channel)==0) {
     if(m->confirmed_rounds++ > LIMIT) {
       // time to change
+      zclock_log("channel change! %s to %s", m->current_channel, channel);
+      
       free(m->next_channel);
       free(m->current_channel);
       m->next_channel = NULL;
       m->confirmed_rounds=0;
       m->current_channel = strdup(channel);
       return 1;
+    } else {
+      zclock_log("tick %s:%s", m->current_channel, channel);
+      return 0;
     }
-    return 0;
   }
 
   // new channel that we weren't expecting.
@@ -105,7 +109,6 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
     char * channel = zmsg_popstr(msg);
     zmsg_t * out = zmsg_new();
     if (port_changed(channel, &channel_memory)) {
-      zclock_log("channel change! %s to %s", channel_memory.current_channel, channel);
       zmsg_pushstr(out, channel_memory.current_channel);
       zmsg_pushstr(out, "CHANNEL_CHANGE");
       zmsg_send(&out, lineout);
