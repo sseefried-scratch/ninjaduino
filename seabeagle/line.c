@@ -27,6 +27,8 @@ typedef struct {
 } channel_memory_t;
 
 int port_changed(char * channel, channel_memory_t * m) {
+  zclock_log("line\nchannel: %s\nchan_memory:%s\nnext_chan:%s",
+             channel, m->current_channel, m->next_channel);
   if (strcmp(channel, m->current_channel)==0) {
     return 0;
   }
@@ -80,10 +82,10 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   zsocket_destroy(context, pipe);
   while(1) {
     msg = zmsg_recv(subscriber);
-    zmsg_dump(msg);
+    // zmsg_dump(msg);
     char * recv_topic = zmsg_popstr(msg);
-    zclock_log("line got topic\nreceived: %s\nexpected: %s\n", recv_topic, config->topic);
-    fflush(stdout);
+    // zclock_log("line got topic\nreceived: %s\nexpected: %s\n", recv_topic, config->topic);
+    //fflush(stdout);
     assert(strcmp(recv_topic, config->topic)==0);
     free(recv_topic);
     /* zframe_t * cmd = zmsg_pop(msg); */
@@ -102,6 +104,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
     char * channel = zmsg_popstr(msg);
     zmsg_t * out = zmsg_new();
     if (port_changed(channel, &channel_memory)) {
+      zclock_log("channel change! %s to %s", channel_memory.current_channel, channel);
       zmsg_pushstr(out, channel_memory.current_channel);
       zmsg_pushstr(out, "CHANNEL_CHANGE");
       zmsg_send(&out, lineout);
