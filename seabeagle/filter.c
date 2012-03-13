@@ -39,7 +39,8 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       // this may be dodgy: some values may be structured.
       int value = cJSON_GetObjectItem(port, "value")->valueint;
       printf("value is %d\n", value);
-      assert(value);
+      assert(value >= 0);
+      assert(value <= 1024);
       // this is pretty sketchy, but how else do we indicate that
       // the line hasn't been initialised yet?
       sprintf(line, "line%04d", i);
