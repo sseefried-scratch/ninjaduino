@@ -80,6 +80,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   zsocket_destroy(context, pipe);
   while(1) {
     msg = zmsg_recv(subscriber);
+    zmsg_dump(msg);
     zframe_t * recv_topic = zmsg_pop(msg);
     zclock_log("line got topic\nreceived: %s\n%expected: %s\n", zframe_strdup(recv_topic), config->topic);
 
