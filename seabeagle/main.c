@@ -29,10 +29,10 @@ int main() {
   parent_handshake(serial_pipe);
   void * filter_pipe = zthread_fork(context, line_dispatcher, NULL);
   parent_handshake(filter_pipe);
+  zclock_log("starting worker");
   void * worker_pipe = zthread_fork(context, worker, (void *) &config);
   parent_handshake(worker_pipe);
-
+  zclock_log("worker ended");
   // FIX do we have to wait for the child threads to finish?
-  sleep(100);
   exit(0);
 }
