@@ -57,7 +57,9 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       }
       zmsg_t * out = zmsg_new();
       // value needs to be an int here FIX
-      zmsg_pushmem(out, &value, sizeof(int)); 
+      int * vcopy = malloc(sizeof(int));
+      *vcopy = value;
+      zmsg_pushmem(out, vcopy, sizeof(int)); 
       zmsg_pushstr(out, type);
       zmsg_pushstr(out,line);
       zmsg_send(&out, events);
