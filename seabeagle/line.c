@@ -67,7 +67,9 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   //  int trigger_capacity = 1;
   
   void * lineout = zsocket_new(context, ZMQ_PUB);
-  zsocket_bind(lineout, config->outpipe);
+  char outpipe[64];
+  sprintf(outpipe, "inproc://%s", config->outpipe);
+  zsocket_bind(lineout, outpipe);
 
   void * subscriber = zsocket_new(context, ZMQ_SUB);
   zsocket_connect(subscriber, "inproc://serial_events");
