@@ -56,6 +56,10 @@ void watch_port(void *cvoid,
 
   while(1) {
     zmsg_t * msg = zmsg_recv(linein);
+    if(!msg) {
+      zclock_log("monitor quitting!");
+      return;
+    }
     zframe_t * cmd = zmsg_pop(msg);
     if(zframe_streq(cmd, "CHANNEL_CHANGE") || 
        zframe_streq(cmd, "CLEAR_MONITORS")) {

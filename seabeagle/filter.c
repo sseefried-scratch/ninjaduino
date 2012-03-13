@@ -24,7 +24,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
     assert(zmsg_size(msg) == 1);
     char * data = zmsg_popstr(msg);
     if(!msg) {
-      zclock_log("line quitting!");
+      zclock_log("filter quitting!");
       return;
     }
     // ephemeral storage, but we'll copy what we want out of
