@@ -78,11 +78,11 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   while(1) {
     msg = zmsg_recv(subscriber);
     zmsg_dump(msg);
-    zframe_t * recv_topic = zmsg_pop(msg);
-    zclock_log("line got topic\nreceived: %s\n%expected: %s\n", zframe_strdup(recv_topic), config->topic);
+    char * recv_topic = zmsg_popstr(msg);
+    zclock_log("line got topic\nreceived: %s\n%expected: %s\n", recv_topic, config->topic);
 
-    assert(zframe_streq(recv_topic, config->topic));
-    zframe_destroy(&recv_topic);
+    assert(strcmp(recv_topic, config->topic)==0);
+    free(recv_topic);
     /* zframe_t * cmd = zmsg_pop(msg); */
 
     /* // this is probably a bit over-keen - we could just send a string */
