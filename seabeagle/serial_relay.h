@@ -1,6 +1,10 @@
+
 #ifndef __SERIAL_RELAY_H__
 #define __SERIAL_RELAY_H__
-#include <stdio.h>
+#include <czmq.h>
 
-void read_serial(void * socket, FILE * in) ;
+typedef struct {
+  FILE * in;
+} serialconfig_t;
+void read_serial(void * in, zctx_t * context, void * pipe) ;
 #endif

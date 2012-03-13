@@ -1,7 +1,6 @@
 #ifndef __FILTER_H__
 #define __FILTER_H__
 
-#include "config.h"
-
-void filter(void * serial, config_t * config);
+#include <czmq.h>
+void line_dispatcher(void * cvoid, zctx_t * context, void * pipe);
 #endif

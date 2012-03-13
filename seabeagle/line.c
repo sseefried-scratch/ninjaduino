@@ -4,6 +4,21 @@
 #include "monitor.h"
 #include "trigger.h"
 
+
+/* 
+outgoing messages to monitors
+__________________
+| CHANNEL_CHANGE |
+|________________|
+| new channel    |
+|________________|
+________________
+| VALUE        |
+|______________|
+| actual value |
+|______________|
+*/
+
 int LIMIT = 3;
 typedef struct {
   char * current_channel;
@@ -34,94 +49,111 @@ int port_changed(zframe_t * channel, channel_memory_t * m) {
 }
 
 
-void line_listener(int line_id, void * subscriber, config_t* config) {
-  char * str;
+void line_listener(void * cvoid, zctx_t * context, void * pipe) {
+  lineconfig_t * config = (lineconfig_t*)  cvoid;
   zmsg_t * msg;
-  // realloc when you get more.
-  int monitor_size = 0;
-  int confirmed_rounds = 0;
+
   channel_memory_t channel_memory = { NULL, NULL, 0 };
-  void * monitor_controller = zsocket_new(config->context, ZMQ_PUB);
-  zsocket_bind(monitor_controller, "inproc://monitor_controller");
+  // void * monitor_controller = zsocket_new(config->context, ZMQ_PUB);
+  //  zsocket_bind(monitor_controller, "inproc://monitor_controller");
   //  int trigger_capacity = 1;
+  
+  char * topic = s_recv(pipe); // something like line0003
+  char * endpoint = "inproc://lineXXXX";
+  sprintf(endpoint, "inproc://%s", topic);
+  void * lineout = zsocket_new(context, ZMQ_PUB);
+  zsocket_bind(lineout, config->outpipe);
 
-
+  void * subscriber = zsocket_new(context, ZMQ_SUB);
+  zsocket_connect(subscriber, "inproc://serial_events");
+  zsockopt_set_subscribe(subscriber, topic);
+  s_send(pipe, "ok");
   while(1) {
-    int i;
-    zframe_t * chan;
-    char * rule_id;
     msg = zmsg_recv(subscriber);
-    zframe_t * cmd = zmsg_pop(msg);
+    zframe_t * recv_topic = zmsg_pop(msg);
+    assert(zframe_streq(recv_topic, topic));
+    zframe_destroy(&recv_topic);
+    /* zframe_t * cmd = zmsg_pop(msg); */
 
-    switch((line_message_type_t)zframe_data(cmd)) {
-      /* on an update, we check the monitors and triggers *
-       * a trigger may fire, a monitor may be on.         *
-       * we may also have received an update of our       *
-       * accessory.                                       */
-    case SERIAL_UPDATE:
-      /* expect to be sent two messages: value and type */
-      assert(zmsg_size(msg) == 2);
+    /* // this is probably a bit over-keen - we could just send a string */
+    /* // rather than an enum. */
+    /* switch((line_message_type_t)zframe_data(cmd)) { */
+    /*   /\* on an update, we check the monitors and triggers * */
+    /*    * a trigger may fire, a monitor may be on.         * */
+    /*    * we may also have received an update of our       * */
+    /*    * accessory.                                       *\/ */
+    /* case SERIAL_UPDATE: */
+    /*   /\* expect to be sent two messages: value and type *\/ */
+    assert(zmsg_size(msg) == 2);
       
-      zframe_t * channel = zmsg_pop(msg);
-      if (port_changed(channel, &channel_memory)) {
-        s_sendmore(monitor_controller, "CHANNEL_CHANGE");
-        s_send(monitor_controller, channel_memory.current_channel);
-      } else {
-        char * value = zmsg_popstr(msg);
-        s_sendmore(monitor_controller, "VALUE");
-        s_send(monitor_controller, value);
-        free(value);
-      }
-      zframe_destroy(&channel);
-      zmsg_destroy(&msg);
-      break;
-    case MONITOR_ON:
-      // create a pthread, wait till we've synchronised. 
-      // delaying main thread while syncing is overhead but
-      // acceptable, and necessary for correctness.
-      
-      chan = zmsg_pop(msg);
-      if (zframe_streq(chan, channel_memory.current_channel)) {
-        void * pipe = zthread_fork(config->context, watch_port, (void*)config);
-        s_send(pipe, channel_memory.current_channel);
-        char * ok = s_recv(pipe);
-        assert(strcmp(ok, "ok") == 0);
-        free(ok);
-      } else {
-        zclock_log("ignoring request for monitor: wrong channel requested");
-      }
-      
-      break;
-    case MONITOR_OFF: 
-      s_send(monitor_controller, "CLEAR_MONITORS");
-      break;
-    case TRIGGER_ON: 
-      // create a pthread, wait till we've synchronised,
-      // pass it whatever it needs. TODO
-      {
-        void * pipe = zthread_fork(config->context, trigger, (void*)config);
-        s_send(pipe, channel_memory.current_channel);
-        // TODO what else does a channel need?
-        char * ok = s_recv(pipe);
-        assert(strcmp(ok, "ok") == 0);
-        free(ok);
-        zsocket_destroy(config->context, pipe);
-        break;
-      }
-    case TRIGGER_OFF:
-      rule_id = zmsg_popstr(msg);
-      s_sendmore(monitor_controller, "CLEAR_TRIGGER");
-      s_send(monitor_controller, rule_id);
-      free(rule_id);
-      break;
-    default:
-      str = zframe_strdup(cmd);
-      fprintf(stderr, "don't understand message %s; dropping\n", str);
-      free(str);
+    zframe_t * channel = zmsg_pop(msg);
+    zmsg_t * out = zmsg_new();
+    if (port_changed(channel, &channel_memory)) {
+      zmsg_pushstr(out, channel_memory.current_channel);
+      zmsg_pushstr(out, "CHANNEL_CHANGE");
+      zmsg_send(lineout, out);
+    } else {
+      zmsg_push(out, zmsg_pop(msg));
+      zmsg_pushstr(out, "VALUE");
+
     }
+    zframe_destroy(&channel);
+    zmsg_destroy(&msg);
+    
   }
-  // encapsulate logic behind lines
-  fprintf(stderr, "not implemented!");
-  exit(1);
+  free(config);
 
+    /*   break; */
+    /*   // TODO this isn't the job of the filter */
+    /* case MONITOR_ON: */
+    /*   // create a pthread, wait till we've synchronised.  */
+    /*   // delaying main thread while syncing is overhead but */
+    /*   // acceptable, and necessary for correctness. */
+      
+    /*   chan = zmsg_pop(msg); */
+    /*   if (zframe_streq(chan, channel_memory.current_channel)) { */
+    /*     void * pipe = zthread_fork(context, watch_port, (void*)config); */
+  // make sure you send the full line endpoint here.
+
+    /*     s_send(pipe, channel_memory.current_channel); */
+    /*     char * ok = s_recv(pipe); */
+    /*     assert(strcmp(ok, "ok") == 0); */
+    /*     free(ok); */
+    /*     zsocket_destroy(context, pipe); */
+    /*   } else { */
+    /*     zclock_log("ignoring request for monitor: wrong channel requested"); */
+    /*   } */
+      
+    /*   break; */
+    /*   // TODO this isn't the job of the filter */
+    /* case MONITOR_OFF:  */
+    /*   s_send(monitor_controller, "CLEAR_MONITORS"); */
+    /*   break; */
+    /*   // TODO this isn't the job of the filter */
+    /* case TRIGGER_ON:  */
+    /*   // create a pthread, wait till we've synchronised, */
+    /*   // pass it whatever it needs. TODO */
+    /*   { */
+    /*     void * pipe = zthread_fork(context, trigger, (void*)config); */
+    /*     s_send(pipe, channel_memory.current_channel); */
+    /*     // TODO what else does a channel need? */
+    /*     char * ok = s_recv(pipe); */
+    /*     assert(strcmp(ok, "ok") == 0); */
+    /*     free(ok); */
+    /*     zsocket_destroy(context, pipe); */
+    /*     break; */
+    /*   } */
+    /*   // TODO this isn't the job of the filter */
+    /* case TRIGGER_OFF: */
+    /*   rule_id = zmsg_popstr(msg); */
+    /*   s_sendmore(monitor_controller, "CLEAR_TRIGGER"); */
+    /*   s_send(monitor_controller, rule_id); */
+    /*   free(rule_id); */
+    /*   break; */
+    /* default: */
+    /*   str = zframe_strdup(cmd); */
+    /*   fprintf(stderr, "don't understand message %s; dropping\n", str); */
+    /*   free(str); */
+    /* } */
+  
 }

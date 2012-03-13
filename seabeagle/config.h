@@ -4,7 +4,7 @@ typedef struct {
   char * identity;
   char * broker_endpoint;
   char * portwatcher_endpoint;
-  void * context;
+  // void * context;
 
 } config_t;
 #endif
