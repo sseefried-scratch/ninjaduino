@@ -4,13 +4,6 @@
 #include "trigger.h"
 #include "utils.h"
 #include "msgpack_wrapper.h"
-/*
-typedef struct {
-  int next_send;
-  int deadline;
-  char * channel;
-} monitor_t;
-*/
 
 void trigger(void *cvoid, 
              zctx_t * context, 
@@ -36,7 +29,6 @@ void trigger(void *cvoid,
   
   void * line = zsocket_new(context, ZMQ_SUB);
   zsockopt_set_unsubscribe(line, "");
-  zsockopt_set_subscribe(line, "CHANNEL_CHANGE");
   zsockopt_set_subscribe(line, "VALUE");
 
   // what line are we on?
@@ -57,10 +49,17 @@ void trigger(void *cvoid,
       zframe_t * cmd = zmsg_pop(msg);
       if(zframe_streq(cmd, "CHANNEL_CHANGE")) {
         // TODO
+        // must have been dormant to have gotten this
+        // if we've changed to our channel, oh, happy day!
+        // reactivate and start looking at reset levels again.
       } else if (zframe_streq(cmd, "VALUE")) {
         char * value = zmsg_popstr(msg);
         // TODO what does a trigger do?
-        
+        // first, check the channel is correct, and go dormant if it's
+        // not.
+        // then, handle the trigger/reset logic.
+        // go dormant -> zsockopt_set_subscribe(line, "CHANNEL_CHANGE");
+        //            -> zsockopt_set_unsubscribe(line, "VALUE");
       } else {
         // shouldn't ever happen.
         zclock_log("shouldn't have received command %s\n", zframe_strdup(cmd));

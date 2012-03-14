@@ -44,7 +44,6 @@ void watch_port(void *cvoid,
   void * linein = zsocket_new(context, ZMQ_SUB);
   zsocket_connect(linein, config->listen_socket);
   zsockopt_set_unsubscribe(linein, "");
-  zsockopt_set_subscribe(linein, "CHANNEL_CHANGE");
   zsockopt_set_subscribe(linein, "CLEAR_MONITORS");
   zsockopt_set_subscribe(linein, "VALUE");
   // have set up subscription, can signal parent that we're ok.
@@ -61,14 +60,24 @@ void watch_port(void *cvoid,
       return;
     }
     zframe_t * cmd = zmsg_pop(msg);
-    if(zframe_streq(cmd, "CHANNEL_CHANGE") || 
-       zframe_streq(cmd, "CLEAR_MONITORS")) {
-      // don't really care what we've changed to...
+    if(zframe_streq(cmd, "CLEAR_MONITORS")) {
+      zclock_log("ephemeral monitor quitting");
+      zmsg_destroy(&msg);
+      zframe_destroy(&cmd);
       break;
     } else if (zframe_streq(cmd, "VALUE")) {
       // TODO perhaps some rate limiting necessary
-      assert(zmsg_size(msg) == 1);
+      assert(zmsg_size(msg) == 2);
+      
       zframe_t * value = zmsg_pop(msg);
+      char * new_channel = zmsg_popstr(msg);
+      if(strcmp(new_channel, config->channel)!=0) {
+        zclock_log("channel change, monitor quitting");
+        zmsg_destroy(&msg);
+        zframe_destroy(&cmd);
+        break;
+      }
+
       zmsg_t * to_send = zmsg_new();
       zmsg_push(to_send, value);
       zmsg_pushstr(to_send, config->channel);

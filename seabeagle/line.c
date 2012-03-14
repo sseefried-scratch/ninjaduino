@@ -113,14 +113,26 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
       
     char * channel = zmsg_popstr(msg);
     zmsg_t * out = zmsg_new();
+    // originally, I thought it was a neat trick to not mention the
+    // channel in every message. unfortunately, this screws up the
+    // case where a new trigger gets introduced: at the beginning, it
+    // has no idea what the channel currently is.
+
+    // rather than trying to micro-optimise, let's just keep repeating
+    // the channel in the value update too.
+
     if (port_changed(channel, &channel_memory)) {
       zmsg_pushstr(out, channel_memory.current_channel);
       zmsg_pushstr(out, "CHANNEL_CHANGE");
       zmsg_send(&out, lineout);
-    } else {
+    }
+    // only send a value if we're all settled down
+    if(strcmp(channel, channel_memory.current_channel)==0) {
+      out = zmsg_new();
+      zmsg_pushstr(out, channel_memory.current_channel);
       zmsg_push(out, zmsg_pop(msg));
       zmsg_pushstr(out, "VALUE");
-
+      zmsg_send(&out, lineout);
     }
     free(channel);
     zmsg_destroy(&msg);
