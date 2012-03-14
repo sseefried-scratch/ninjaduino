@@ -9,6 +9,8 @@
 #include "filter.h"
 #include "utils.h"
 #include "worker.h"
+#include "worker_config.h"
+#include "camera.h"
 
 int main() {
 
@@ -29,12 +31,34 @@ int main() {
   parent_handshake(serial_pipe);
   void * filter_pipe = zthread_fork(context, line_dispatcher, NULL);
   parent_handshake(filter_pipe);
-  zclock_log("starting worker");
-  void * worker_pipe = zthread_fork(context, worker, (void *) &config);
-  parent_handshake(worker_pipe);
-  zclock_log("worker ended");
+
+  // separate worker threads
+  zclock_log("starting workers");
+
+  zthread_attached_fn * independent_workers[2] = {camera};
+
+  int i;
+  
+  for(i = 0; i<1; i++ ) {
+    parent_handshake(zthread_fork(context, independent_workers[i], (void*) &config));
+  }
+
+  // we also start workers for the analog lines. These are easy to
+  // monitor, we can just pass a channel name.
+  
+  workerconfig_t wconf;
+  wconf.base_config = &config;
+  
+  char * internal_channels[3] = { "distance", "light", "button" };
+  for(i=0;i<3;i++) {
+    wconf.channel = internal_channels[i];
+    parent_handshake(zthread_fork(context, generic_worker, (void*) &wconf));    
+  }
+
   // FIX We have to wait for the child threads to finish, but this
   // can't be the best way.
   while(1) sleep(100);
   exit(0);
 }
+
+

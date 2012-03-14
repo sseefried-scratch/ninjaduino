@@ -1,5 +1,5 @@
 # define the C source files
-SRCS = main.c filter.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.c worker.c mdwrkapi.c
+SRCS = main.c filter.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.c worker.c mdwrkapi.c camera.c msgpack_wrapper.c
 
 # define the C object files 
 #
@@ -33,7 +33,7 @@ test_vector: test_vector.o vector.o
 #	-lczmq 
 
 driver: $(OBJS)
-	gcc -o driver $(OBJS) -lzmq -lczmq
+	gcc -o driver $(OBJS) -lzmq -lczmq -lmsgpack
 
 clean:
 	$(RM) *.o *~ $(MAIN)
