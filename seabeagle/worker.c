@@ -2,7 +2,7 @@
 #include "mdwrkapi.h"
 #include "utils.h"
 #include "trigger.h"
-/* 
+/*
 
   This is the worker that listens for addition & deletion of rules.
   each rule is a thread unto itself, we just turn them on and off as
@@ -14,9 +14,22 @@
 
  */
 
-/* 
+/*
 
-   Message format
+   Message formats.
+
+   There are a number of different message formats that this worker
+   can handle. The format of the message is distinguished by the first
+   part of the multipart message.
+
+   In the ASCII diagrams below anything expected verbatim is in quotes
+   (e.g. "AddMonitor"). Everything else is an a arbitrary field name.
+   Naturally every message part in 0MQ is a binary blob, but each
+   each field is annotated with the type we are expecting
+
+   - strings are not null terminated
+   - integers are just numeric strings
+   - msgpack`s are defined at http://msgpack.org/
 
    ________________
    | "AddMonitor" |
@@ -25,25 +38,27 @@
    | "RemoveMonitor" |
    |_________________|
 
-   ___________________
-   | "AddTrigger"    |
-   | rule_id         |
-   | triggername     |
-   | target_service  |
-   | auth: msgpack   |
-   | addins: msgpack |
-   |-----------------|   addins must contain "rule_id";
-                        "trigger_level" and "reset_level" are
-                        respected
+   ___________________________
+   | "AddTrigger"            |
+   | rule_id: integer        |
+   | trigger_name: string    |
+   | target_service: string  |
+   | auth: msgpack           |
+   | addins: msgpack         |
+   |-------------------------|
+     addins must contain "rule_id";
+     "trigger_level" and "reset_level" are
+     respected
 
                         auth is ignored.
 
-    We don't have removeTrigger, because removeRule can remove either.
-   ______________________
-   | "RemoveRule"       |
-   | rule_id            |
-   |____________________|
-   
+    We don't have RemoveTrigger and RemoveAction, because removeRule can
+    remove either Triggers or Actions
+   ____________________
+   | "RemoveRule"     |
+   | rule_id: integer |
+   |__________________|
+
 
  */
 
@@ -102,12 +117,12 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
     } else if (strcmp(command, "AddMonitor")==0) {
 
     }
-    
-        
 
-        
-      
-      
+
+
+
+
+
     } else {
       zclock_log("Can't handle command %s: ignoring", command);
     }
