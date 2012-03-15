@@ -46,7 +46,7 @@
    | auth: msgpack           |
    | addins: msgpack         |
    |-------------------------|
-     - addins must contain "rule_id";
+     - addins must contain "line_id";
      - "trigger_level" and "reset_level" are
        respected.
      - auth is ignored.
