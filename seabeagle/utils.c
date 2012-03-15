@@ -29,9 +29,7 @@ void recv_sync(char * expected, void * pipe) {
 void send_sync(char * msg, void * pipe) {
   assert(msg);
   assert(pipe);
-  zmsg_t * out = zmsg_new();
-  zmsg_pushstr(out, msg);
-  zmsg_send(&out, pipe);
+  zstr_send(pipe, msg);
 }
 
 
