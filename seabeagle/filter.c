@@ -5,7 +5,8 @@
 #include <czmq.h>
 #include "utils.h"
 
-
+/* line dispatcher pulls in json and pulls it apart,
+   dispatching to a pub socket with an appropriate topic (lineXXXX) */
 
 void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
   // zmq_pollitem_t  * items = malloc(1 * sizeof(zmq_pollitem_t));
@@ -42,9 +43,9 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
 
     for(i=1; port; i++) {
       char line[16];
-      char * type = cJSON_GetObjectItem(port, "type")->valuestring;
+      char * channel = cJSON_GetObjectItem(port, "type")->valuestring;
       //zclock_log("filter\ntype is %s\n", type);
-      assert(type);
+      assert(channel);
       // this may be dodgy: some values may be structured.
       int value = cJSON_GetObjectItem(port, "value")->valueint;
       // zclock_log("filter\nvalue is %d\n", value);
@@ -69,7 +70,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       int * vcopy = malloc(sizeof(int));
       *vcopy = value;
       zmsg_pushmem(out, vcopy, sizeof(int)); 
-      zmsg_pushstr(out, type);
+      zmsg_pushstr(out, channel);
       zmsg_pushstr(out,line);
       zmsg_send(&out, events);
 

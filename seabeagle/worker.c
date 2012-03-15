@@ -14,6 +14,40 @@
 
  */
 
+/* 
+
+   Message format
+
+   ________________
+   | "AddMonitor" |
+   |______________|
+   ___________________
+   | "RemoveMonitor" |
+   |_________________|
+
+   ___________________
+   | "AddTrigger"    |
+   | rule_id         |
+   | triggername     |
+   | target_service  |
+   | auth: msgpack   |
+   | addins: msgpack |
+   |-----------------|   addins must contain "rule_id";
+                        "trigger_level" and "reset_level" are
+                        respected
+
+                        auth is ignored.
+
+    We don't have removeTrigger, because removeRule can remove either.
+   ______________________
+   | "RemoveRule"       |
+   | rule_id            |
+   |____________________|
+   
+
+ */
+
+
 void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
   zhash_t * rules = zhash_new();
   zclock_log("worker trying to connect!");
@@ -29,12 +63,11 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
 
     char * command = zmsg_popstr(request);
     char * rule_id = zmsg_popstr(request);
-    if (strcmp(command, "NewTrigger") == 0) {
+    if (strcmp(command, "AddTrigger") == 0) {
       zclock_log("new trigger!");
-
-      
       if (zhash_lookup(rules, rule_id)) {
         // already have a rule with that id! WTF??
+        // FIXME should probably delete this and reinstate
         zclock_log("Received duplicate rule %s, ignoring", rule_id);
         zmsg_destroy(&request);
         reply = zmsg_new();
@@ -66,7 +99,10 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         zmsg_pushstr(reply, "rule not found");
         zmsg_destroy(&request);
       }
-      
+    } else if (strcmp(command, "AddMonitor")==0) {
+
+    }
+    
         
 
         
