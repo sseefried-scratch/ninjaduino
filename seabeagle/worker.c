@@ -46,13 +46,12 @@
    | auth: msgpack           |
    | addins: msgpack         |
    |-------------------------|
-     addins must contain "rule_id";
-     "trigger_level" and "reset_level" are
-     respected
+     - addins must contain "rule_id";
+     - "trigger_level" and "reset_level" are
+       respected.
+     - auth is ignored.
 
-                        auth is ignored.
-
-    We don't have RemoveTrigger and RemoveAction, because removeRule can
+    We don't have RemoveTrigger and RemoveAction, because RemoveRule can
     remove either Triggers or Actions
    ____________________
    | "RemoveRule"     |
