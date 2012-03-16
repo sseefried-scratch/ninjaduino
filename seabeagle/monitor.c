@@ -54,8 +54,8 @@ void watch_port(void *cvoid,
 
   void * lineout = zsocket_new(context, ZMQ_PUB);
   zsocket_connect(lineout, config->out_socket);
-
-  while(1) {
+  time_t until = time(NULL) + 30;
+  while(time(NULL)<until) {
     zmsg_t * msg = zmsg_recv(linein);
     if(!msg) {
       zclock_log("monitor quitting!");
