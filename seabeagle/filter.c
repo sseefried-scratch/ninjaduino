@@ -56,6 +56,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
 
       if ((lines & (0x1 << (i-1))) == 0) {
         // line listener owns the config
+        zclock_log("filter: starting line listener on port %d\n", i);
         lineconfig_t * lineconfig = malloc(sizeof(lineconfig_t));
         //         lineconfig->inpipe = "inproc://line";
         lineconfig->line_id = i;
