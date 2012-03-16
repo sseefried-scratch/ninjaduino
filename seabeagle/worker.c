@@ -68,7 +68,7 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
   workerconfig_t *config = (workerconfig_t*) cvoid;
   zhash_t * rules = zhash_new();
   zclock_log("worker trying to connect!");
-  mdwrk_t *session = mdwrk_new ("tcp://10.10.50.60:5555", "echo", 1);
+  mdwrk_t *session = mdwrk_new ("tcp://10.10.50.60:5555", "echo", 0);
   zclock_log("worker connected!");
   child_handshake(pipe);
   zmsg_t *reply = NULL;
