@@ -91,8 +91,9 @@ void watch_port(void *cvoid,
     zmsg_destroy(&msg);
     zframe_destroy(&cmd);
   }
+  zclock_log("line %d dying", config->line_id);
   //cleanup
-  zsocket_destroy(context, &linein);
-  zsocket_destroy(context, &lineout);
+  zsocket_destroy(context, linein);
+  zsocket_destroy(context, lineout);
 
 }
