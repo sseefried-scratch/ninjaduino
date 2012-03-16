@@ -84,7 +84,9 @@ void watch_port(void *cvoid,
       zmsg_t * to_send = zmsg_new();
       zmsg_push(to_send, value);
       zmsg_pushstr(to_send, config->channel);
-      zmsg_pushstr(to_send, config->source_worker);      
+      zmsg_pushstr(to_send, config->source_worker);
+
+      zmsg_dump(to_send);
       zmsg_send(&to_send, lineout);
       // don't destroy value frame, now owned by zmsg
     }
