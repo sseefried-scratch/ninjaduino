@@ -50,7 +50,7 @@ int main() {
     workerconfig_t * wconf = malloc(sizeof(workerconfig_t));
     wconf->base_config = &config;
     wconf->channel = internal_channels[i];
-    parent_handshake(zthread_fork(context, generic_worker, (void*) &wconf));    
+    parent_handshake(zthread_fork(context, generic_worker, (void*) wconf));    
   }
 
   // FIX We have to wait for the child threads to finish, but this
