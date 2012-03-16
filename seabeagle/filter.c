@@ -42,7 +42,6 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
     cJSON * port = cJSON_GetObjectItem(root, "ports")->child;
 
     for(i=1; port; i++) {
-      char line[16];
       char * channel = cJSON_GetObjectItem(port, "type")->valuestring;
       //zclock_log("filter\ntype is %s\n", type);
       assert(channel);
@@ -51,15 +50,15 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       // zclock_log("filter\nvalue is %d\n", value);
       assert(value >= 0);
       assert(value <= 1024);
+      char * line = to_linesocket(i);
       // this is pretty sketchy, but how else do we indicate that
       // the line hasn't been initialised yet?
-      sprintf(line, "line%04d", i);
+
       if ((lines & (0x1 << (i-1))) == 0) {
         // line listener owns the config
         lineconfig_t * lineconfig = malloc(sizeof(lineconfig_t));
-        lineconfig->inpipe = "line";
-        lineconfig->outpipe = strdup(line);
-        lineconfig->topic = lineconfig->outpipe; // I GUESS? TODO
+        //         lineconfig->inpipe = "inproc://line";
+        lineconfig->line_id = i;
         void * pipe = zthread_fork(context, line_listener, (void*)lineconfig);
         parent_handshake(pipe);
         zsocket_destroy(context, pipe);

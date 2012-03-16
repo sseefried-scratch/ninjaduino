@@ -56,8 +56,7 @@ int port_changed(char * channel, channel_memory_t * m) {
 }
 
 void dump_lineconfig(lineconfig_t * c) {
-  zclock_log("LINE CONFIG\ninpipe: %s\noutpipe:%s\ntopic:%s\n",
-             c->inpipe, c->outpipe, c->topic);
+  zclock_log("LINE CONFIG\n%d", c->line_id);
 }
 
 void line_listener(void * cvoid, zctx_t * context, void * pipe) {
@@ -73,15 +72,18 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   //  int trigger_capacity = 1;
   
   void * lineout = zsocket_new(context, ZMQ_PUB);
-  char outpipe[64];
-  sprintf(outpipe, "inproc://%s", config->outpipe);
+  char * outpipe = to_linesocket(config->line_id);
+
   zsocket_bind(lineout, outpipe);
 
   void * subscriber = zsocket_new(context, ZMQ_SUB);
-  zclock_log("subscribing to |%s|", config->topic);
+  zclock_log("subscribing to line |%d|", config->line_id);
   zsockopt_set_unsubscribe(subscriber, "");
-  zsockopt_set_subscribe(subscriber, config->topic);
-  zsocket_connect(subscriber, "inproc://serial_events");
+
+  char * topic = to_line(config->line_id);
+  // 
+  zsockopt_set_subscribe(subscriber, topic);
+  zsocket_connect(subscriber, "inproc://line");
 
   child_handshake(pipe);
   zsocket_destroy(context, pipe);
@@ -96,7 +98,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
     char * recv_topic = zmsg_popstr(msg);
     // zclock_log("line got topic\nreceived: %s\nexpected: %s\n", recv_topic, config->topic);
     //fflush(stdout);
-    assert(strcmp(recv_topic, config->topic)==0);
+    assert(strcmp(recv_topic, topic)==0);
     free(recv_topic);
     /* zframe_t * cmd = zmsg_pop(msg); */
 
@@ -149,14 +151,6 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
       
     /*   chan = zmsg_pop(msg); */
     /*   if (zframe_streq(chan, channel_memory.current_channel)) { */
-    /*     void * pipe = zthread_fork(context, watch_port, (void*)config); */
-  // make sure you send the full line endpoint here.
-
-    /*     s_send(pipe, channel_memory.current_channel); */
-    /*     char * ok = s_recv(pipe); */
-    /*     assert(strcmp(ok, "ok") == 0); */
-    /*     free(ok); */
-    /*     zsocket_destroy(context, pipe); */
     /*   } else { */
     /*     zclock_log("ignoring request for monitor: wrong channel requested"); */
     /*   } */

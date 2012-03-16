@@ -2,6 +2,8 @@
 #include "mdwrkapi.h"
 #include "utils.h"
 #include "trigger.h"
+#include "monitor.h"
+#include "worker_config.h"
 /*
 
   This is the worker that listens for addition & deletion of rules.
@@ -63,6 +65,7 @@
 
 
 void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
+  workerconfig_t *config = (workerconfig_t*) cvoid;
   zhash_t * rules = zhash_new();
   zclock_log("worker trying to connect!");
   mdwrk_t *session = mdwrk_new ("tcp://10.10.50.60:5555", "echo", 1);
@@ -70,6 +73,12 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
   child_handshake(pipe);
   zmsg_t *reply = NULL;
   void * rule_pipe = NULL;
+  char * ninja = config->base_config->identity;
+  char * channel = config->channel;
+  char * servicename = malloc(strlen(ninja) +
+                              strlen(channel) + 2);
+  sprintf(servicename, "%s:%s", ninja,channel);
+
   while (1) {
     zmsg_t *request = mdwrk_recv (session, &reply);
     if (request == NULL)
@@ -114,14 +123,20 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         zmsg_destroy(&request);
       }
     } else if (strcmp(command, "AddMonitor")==0) {
-
-    }
-
-
-
-
-
-
+      // unconditionally fork a monitor for each line
+      // they'll die when they get a channel change
+      int i;
+      for(i=0; i<4; i++) { 
+        monitorconfig_t * mconf = malloc(sizeof(monitorconfig_t));
+        mconf->line_id = i;
+        mconf->source_worker = servicename;
+        mconf->out_socket = config->base_config->portwatcher_endpoint;
+        void * pipe = zthread_fork(context, watch_port, (void*)mconf);
+        send_sync("ping", pipe);
+        recv_sync("pong", pipe);
+        zsocket_destroy(context, pipe);
+      }
+      
     } else {
       zclock_log("Can't handle command %s: ignoring", command);
     }

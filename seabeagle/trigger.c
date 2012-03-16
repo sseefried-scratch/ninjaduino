@@ -50,6 +50,7 @@ int parse_trigger(msgpack_object * addins_obj, trigger_t * target) {
 
   msgpack_object_map addins_hash = addins_obj->via.map;
   int i;
+  int success = 0;
   for(i=0; i<addins_hash.size; i++) {
     msgpack_object key = addins_hash.ptr[i].key;
     msgpack_object obj = addins_hash.ptr[i].val;
@@ -66,13 +67,15 @@ int parse_trigger(msgpack_object * addins_obj, trigger_t * target) {
     int64_t o = obj.via.i64;
     if        (strncmp(kstr, "line_id", size) == 0) {
       target->line_id = o;
+      printf("found line\n");
+      success = 1;
     } else if (strncmp(kstr, "trigger_level", size) == 0) {
       target->trigger_level = o;
     } else if (strncmp(kstr, "reset_level", size) == 0) {
       target->reset_level = o;
     }
   }
-  return 1;
+  return success;
 }
 
 

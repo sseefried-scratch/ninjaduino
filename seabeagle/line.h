@@ -9,9 +9,7 @@
 
 
 typedef struct {
-  char * inpipe;
-  char * outpipe;
-  char * topic;
+  int line_id;
 } lineconfig_t;
 
 typedef enum  { SERIAL_UPDATE, 

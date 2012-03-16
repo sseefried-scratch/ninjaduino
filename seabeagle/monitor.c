@@ -30,8 +30,8 @@ __________________
 */
 
 void dump_monitorconfig(monitorconfig_t * c) {
-  zclock_log("source: %s\nline:%d\nlistener:%s\nout:%s\nchannel:%s",
-          c->source_worker, c->line_id, c->listen_socket, c->out_socket, c->channel);
+  zclock_log("source: %s\nline:%d\nchannel:%s",
+          c->source_worker, c->line_id, c->channel);
 }
 
 void watch_port(void *cvoid, 
@@ -42,7 +42,9 @@ void watch_port(void *cvoid,
   dump_monitorconfig(config);
 
   void * linein = zsocket_new(context, ZMQ_SUB);
-  zsocket_connect(linein, config->listen_socket);
+  char * listen_socket = to_linesocket(config->line_id);
+
+  zsocket_connect(linein, listen_socket);
   zsockopt_set_unsubscribe(linein, "");
   zsockopt_set_subscribe(linein, "CLEAR_MONITORS");
   zsockopt_set_subscribe(linein, "VALUE");

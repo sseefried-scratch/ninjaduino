@@ -45,13 +45,11 @@ int main() {
 
   // we also start workers for the analog lines. These are easy to
   // monitor, we can just pass a channel name.
-  
-  workerconfig_t wconf;
-  wconf.base_config = &config;
-  
   char * internal_channels[3] = { "distance", "light", "button" };
   for(i=0;i<3;i++) {
-    wconf.channel = internal_channels[i];
+    workerconfig_t * wconf = malloc(sizeof(workerconfig_t));
+    wconf->base_config = &config;
+    wconf->channel = internal_channels[i];
     parent_handshake(zthread_fork(context, generic_worker, (void*) &wconf));    
   }
 

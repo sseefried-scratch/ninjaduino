@@ -3,11 +3,10 @@
 #include "czmq.h"
 
 typedef struct {
-  char * source_worker; // is this n:1234 or n:1234:$channeL?
+  char * source_worker; // n:1234:distance
   int line_id;
-  char * listen_socket;
-  char * out_socket;
-  char * channel;
+  char * channel;       // distance
+  char * out_socket;    // tcp://au.ninjablocks.com:5773
 } monitorconfig_t;
 
 void watch_port(void *config, 

@@ -32,4 +32,15 @@ void send_sync(char * msg, void * pipe) {
   zstr_send(pipe, msg);
 }
 
+char * to_linesocket(int l) {
+  char * socketname = malloc(20);
+  sprintf(socketname, "inproc://line%04d", l);
+  return socketname;
+}
+
+char * to_line(int l) {
+  char * topic = malloc(9);
+  sprintf(topic, "line%04d", l);
+  return topic;
+}
 
