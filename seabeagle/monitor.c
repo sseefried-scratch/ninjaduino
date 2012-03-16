@@ -74,7 +74,8 @@ void watch_port(void *cvoid,
       zframe_t * value = zmsg_pop(msg);
       char * new_channel = zmsg_popstr(msg);
       if(strcmp(new_channel, config->channel)!=0) {
-        zclock_log("channel change, monitor quitting");
+        zclock_log("listening for %s, channel changed to %s, monitor quitting",
+                   config->channel, new_channel);
         zmsg_destroy(&msg);
         zframe_destroy(&cmd);
         break;
