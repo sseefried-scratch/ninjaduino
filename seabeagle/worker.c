@@ -126,7 +126,7 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
       // unconditionally fork a monitor for each line
       // they'll die when they get a channel change
       int i;
-      for(i=0; i<4; i++) { 
+      for(i=1; i<4; i++) { 
         monitorconfig_t * mconf = malloc(sizeof(monitorconfig_t));
         mconf->line_id = i;
         mconf->source_worker = servicename;
