@@ -83,6 +83,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   char * topic = to_line(config->line_id);
   // 
   zsockopt_set_subscribe(subscriber, topic);
+  zclock_log("subscribing to literal line |%s|", topic);
   zsocket_connect(subscriber, "inproc://line");
 
   child_handshake(pipe);

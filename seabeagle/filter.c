@@ -50,7 +50,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       // zclock_log("filter\nvalue is %d\n", value);
       assert(value >= 0);
       assert(value <= 1024);
-      char * line = to_linesocket(i);
+
       // this is pretty sketchy, but how else do we indicate that
       // the line hasn't been initialised yet?
 
@@ -71,6 +71,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       *vcopy = value;
       zmsg_pushmem(out, vcopy, sizeof(int)); 
       zmsg_pushstr(out, channel);
+      char * line = to_line(i);
       zmsg_pushstr(out,line);
       zmsg_send(&out, events);
 
