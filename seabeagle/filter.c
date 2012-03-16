@@ -43,8 +43,14 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
 
     for(i=1; port; i++) {
       char * channel = cJSON_GetObjectItem(port, "type")->valuestring;
+      char * tmp = channel;
+      while(*tmp) {
+        *tmp = tolower(*tmp);
+        tmp++;
+      }
       //zclock_log("filter\ntype is %s\n", type);
       assert(channel);
+      
       // this may be dodgy: some values may be structured.
       int value = cJSON_GetObjectItem(port, "value")->valueint;
       // zclock_log("filter\nvalue is %d\n", value);
