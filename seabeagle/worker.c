@@ -131,6 +131,7 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         mconf->line_id = i;
         mconf->source_worker = servicename;
         mconf->out_socket = config->base_config->portwatcher_endpoint;
+        mconf->channel = channel;
         void * pipe = zthread_fork(context, watch_port, (void*)mconf);
         send_sync("ping", pipe);
         recv_sync("pong", pipe);
