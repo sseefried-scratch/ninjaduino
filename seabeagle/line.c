@@ -90,7 +90,6 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   zsocket_destroy(context, pipe);
 
   while(1) {
-    zclock_log("Line %d in loop and waiting to receive", config->line_id);
     msg = zmsg_recv(subscriber);
     if(!msg) {
       zclock_log("line quitting!");
