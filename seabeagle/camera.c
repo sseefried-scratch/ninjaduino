@@ -22,7 +22,7 @@ void camera(void * cvoid, zctx_t * context, void * pipe) {
       sleep(1);
     }
     if(session==NULL)
-      session = mdwrk_new ("tcp://10.10.50.60:5555", "n:1234:camera", 1);
+      session = mdwrk_new ("tcp://10.10.50.60:5555", "n:1234:camera", 0);
     zclock_log("worker connected!");
     
     zmsg_t *reply = NULL;
