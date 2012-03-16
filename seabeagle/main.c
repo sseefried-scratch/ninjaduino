@@ -19,8 +19,8 @@ int main() {
   config.identity = "n:1234";
 
   // same for this
-  config.broker_endpoint = "tcp://launch.ninjablocks.com:5773";
-  config.portwatcher_endpoint = "tcp://launch.ninjablocks.com:5774";
+  config.broker_endpoint = "tcp://au.ninjablocks.com:5555";
+  config.portwatcher_endpoint = "tcp://au.ninjablocks.com:5556";
   zctx_t * context = zctx_new();
   /*  The serial thread just reads from /dev/ttyO1 and publishes to an
    *  inproc socket. This could be done inline, but now we can test
