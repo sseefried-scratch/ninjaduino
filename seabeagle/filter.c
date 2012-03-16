@@ -21,7 +21,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
   int lines = 0;
 
   void * events = zsocket_new(context, ZMQ_PUB);
-  zsocket_bind(events, "inproc://serial_events");
+  zsocket_bind(events, "inproc://line");
   while(1) {
     zmsg_t *msg = zmsg_recv(serial);
     assert(zmsg_size(msg) == 1);
