@@ -23,7 +23,7 @@ CFLAGS=-g -Wall
                 -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $*.P; \
             rm -f $*.d
 
-all:  driver
+all:  seabeagle
 
 # test: test_filter
 test_vector: test_vector.o vector.o
@@ -32,8 +32,8 @@ test_vector: test_vector.o vector.o
 #	gcc -o test_filter filter.o test_filter.o cJSON.o line.o -lzmq
 #	-lczmq 
 
-driver: $(OBJS)
-	gcc -o driver $(OBJS) -lzmq -lczmq -lmsgpack
+seabeagle: $(OBJS)
+	gcc -o seabeagle $(OBJS) -lzmq -lczmq -lmsgpack
 
 clean:
 	$(RM) *.o *~ $(MAIN)
