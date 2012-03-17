@@ -20,8 +20,6 @@ Outgoing messages to portwatcher
 __________________
 | source_worker  |
 |________________|
-| channel        |
-|________________|
 | line_id        |
 |________________|
 | value:msgpack  |
@@ -43,7 +41,8 @@ void watch_port(void *cvoid,
 
   void * linein = zsocket_new(context, ZMQ_SUB);
   char * listen_socket = to_linesocket(config->line_id);
-
+  char line_id[16];
+  sprintf(line_id, "%d", config->line_id);
   zsocket_connect(linein, listen_socket);
   zsockopt_set_unsubscribe(linein, "");
   zsockopt_set_subscribe(linein, "CLEAR_MONITORS");
@@ -83,7 +82,7 @@ void watch_port(void *cvoid,
 
       zmsg_t * to_send = zmsg_new();
       zmsg_push(to_send, value);
-      zmsg_pushstr(to_send, config->channel);
+      zmsg_pushstr(to_send, line_id);
       zmsg_pushstr(to_send, config->source_worker);
 
       zmsg_dump(to_send);
