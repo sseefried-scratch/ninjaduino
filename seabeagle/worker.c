@@ -98,7 +98,9 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
       } else {
         // start a new rule thread
         zmsg_pushstr(request, rule_id);
-        void * pipe = zthread_fork(context, trigger, NULL);
+        triggerconfig_t * tconf = malloc(sizeof(triggerconfig_t));
+        tconf->channel = channel;
+        void * pipe = zthread_fork(context, trigger, &tconf);
         zmsg_send(pipe, request);
         recv_sync("ok", pipe);
         zhash_insert(rules, rule_id, pipe);

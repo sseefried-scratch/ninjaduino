@@ -25,20 +25,28 @@ typedef struct {
 
 typedef struct 
 {
-  int (*comparator)( int, int);
+
 } triggertype_t;
 
 
 typedef struct {
+  char * trigger_name;
+  int (*trigger)( triggermemory_t*, int); 
   int line_id;
   int trigger_level;
   int reset_level;
 } trigger_t;
 
-int (*pt2Function) (float, char, char); // C
-int trigger_fired(triggermemory_t *m, triggertype_t * ttype, char * value){
+// a trigger function is one that takes a trigger_memory and a new value,
+// then returns a bool to say whether or not it fired. may edit the
+// trigger_memory in place.
+
+
+typedef int (*triggerfunction) (triggermemory_t *, int value); // C
+
+/* int trigger_fired(triggermemory_t *m, triggertype_t * ttype, char * value){ */
   
-}
+/* } */
 
 // what do we expect to get out of addins?
 //   line_id is mandatory
@@ -92,21 +100,25 @@ void send_trigger(mdcli_t * client, char * target_worker, char * raw_value, char
 }
 
 
+
+triggerfunction * find_trigger(char * channel, char * triggername){
+  return NULL;
+}
+
 void trigger(void *cvoid, 
              zctx_t * context, 
              void * control) {
-  // triggerconfig_t * config = (triggerconfig_t*) cvoid;
+  triggerconfig_t * config = (triggerconfig_t*) cvoid;
   //set up msgpack stuff
   zclock_log("watch_port started!");
   msgpack_zone mempool;
   msgpack_zone_init(&mempool, 2048);
   trigger_t trigger;
   // TODO
-  char * user_id = "1"; 
+  char * user_id = "15"; 
   // TODO get broker in somehow
   char * broker = "tcp://au.ninjablocks.com:5773";
-  // TODO channel from somewhere
-  char * channel;
+  char * channel = config->channel;
   mdcli_t * client = mdcli_new(broker, 1); //VERBOSE
   triggertype_t trigger_type;
   // sort out comms with the overlord
@@ -123,9 +135,16 @@ void trigger(void *cvoid,
   zframe_t * addins = zmsg_pop(rule_details); // msgpack packed
   zmsg_destroy(&rule_details);
   msgpack_object * addins_obj = parse_msgpack(&mempool, addins);
+  // triggerfunction * trigger_function = new_trigger(addins);
   if(!parse_trigger(addins_obj, &trigger)) {
     //bad message
     zclock_log("bad trigger definition");
+    return;
+  }
+  triggerfunction * trigger_func;
+  if(!(trigger_func = find_trigger(channel, trigger_name))) {
+    zclock_log("no trigger found for channel %s, trigger %s",
+               channel, trigger_name);
     return;
   }
 
@@ -170,7 +189,8 @@ void trigger(void *cvoid,
           zsockopt_set_subscribe(line, "CHANNEL_CHANGE");
           zsockopt_set_unsubscribe(line, "VALUE");
         } 
-        else if(trigger_fired(&trigger_memory, &trigger_type, value)) {
+        
+        else if((*trigger_func)(&trigger_memory, atoi(value))) {
           send_trigger(client, target_worker, value, user_id);
         }           
       } else {
