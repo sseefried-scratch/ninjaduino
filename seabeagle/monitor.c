@@ -53,7 +53,7 @@ void watch_port(void *cvoid,
 
   void * lineout = zsocket_new(context, ZMQ_PUB);
   zsocket_connect(lineout, config->out_socket);
-  time_t until = time(NULL) + 30;
+  time_t until = time(NULL) + 60;
   while(time(NULL)<until) {
     zmsg_t * msg = zmsg_recv(linein);
     if(!msg) {
@@ -71,7 +71,10 @@ void watch_port(void *cvoid,
       assert(zmsg_size(msg) == 2);
       
       zframe_t * value = zmsg_pop(msg);
+      int res = *(int*)zframe_data(value);
+      zclock_log("res is %d", res);
       char * new_channel = zmsg_popstr(msg);
+
       if(strcmp(new_channel, config->channel)!=0) {
         zclock_log("listening for %s, channel changed to %s, monitor quitting",
                    config->channel, new_channel);
@@ -81,7 +84,10 @@ void watch_port(void *cvoid,
       }
 
       zmsg_t * to_send = zmsg_new();
-      zmsg_push(to_send, value);
+
+      char buf[1024];
+      sprintf(buf, "%d", res);
+      zmsg_pushstr(to_send, buf);
       zmsg_pushstr(to_send, line_id);
       zmsg_pushstr(to_send, config->source_worker);
 
