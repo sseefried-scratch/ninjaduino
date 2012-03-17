@@ -57,6 +57,7 @@ int parse_trigger(msgpack_object * addins_obj, trigger_t * target) {
   if (addins_obj->type != MSGPACK_OBJECT_MAP) {
     zclock_log("expected a hash at the top level, got %d",
                addins_obj->type);
+    return 0;
   }
 
   msgpack_object_map addins_hash = addins_obj->via.map;
@@ -142,6 +143,7 @@ void trigger(void *cvoid,
   if(!parse_trigger(addins_obj, &trigger)) {
     //bad message
     zclock_log("bad trigger definition");
+    msgpack_object_print(stdout, *addins_obj);
     return;
   }
   triggerfunction * trigger_func;
