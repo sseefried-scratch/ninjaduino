@@ -1,6 +1,7 @@
 #include <czmq.h>
 #include "mdwrkapi.h"
 #include "utils.h"
+#include "config.h"
 
 int camera_connected() {
   return 1;
@@ -11,38 +12,43 @@ int camera_connected() {
 void camera(void * cvoid, zctx_t * context, void * pipe) {
   zclock_log("worker trying to connect!");
   child_handshake(pipe);
-  mdwrk_t * session = NULL;
+  config_t * config = (config_t*) cvoid;
+  char workername[512];
+  void * data = malloc(2000000); // 2 mb enough?
+  sprintf(workername, "%s:camera", config->identity);
+  mdwrk_t * session = mdwrk_new (config->broker_endpoint, workername, 0);
   while(1) {
-    // loop * sleep until  camera is connected
-    while(!camera_connected()) {
-      if(session) {
-        mdwrk_destroy(&session);
-        session = NULL;
-      }
-      sleep(1);
-    }
-    if(session==NULL)
-      session = mdwrk_new ("tcp://10.10.50.60:5555", "n:1234:camera", 0);
-    zclock_log("worker connected!");
-    
     zmsg_t *reply = NULL;
-    while (1) {
-      zmsg_t *request = mdwrk_recv (session, &reply);
-      if (request == NULL)
-        break;              //  Worker was interrupted
-      
+    zmsg_t *request = mdwrk_recv (session, &reply);
+    if (request == NULL)
+      break;              //  Worker was interrupted
+    reply = zmsg_new();
+    if(camera_connected()) {
       char * command = zmsg_popstr(request);
-      if (strcmp(command, "NewTrigger") == 0) {
-        zclock_log("new trigger!");
+
+      if (strcmp(command, "TakePicture") == 0) {
+        if (!system("rm snap.jpg; uvccapture")) {
+          zclock_log("error taking photo");
+        } else {
+          
+        }
+        
       } else {
         zclock_log("Can't handle command %s: ignoring", command);
       }
-      reply = zmsg_new();
+      FILE * f = fopen("snap.jpg", "r");
+      int bytes_read = fread(data, 1, 2000000, f);
+      zmsg_pushmem(reply, data, bytes_read);
       zmsg_pushstr(reply, "ok");
       zmsg_destroy(&request);
-      
+    } else {
+      zclock_log("camera was unplugged while we were waiting for a request");
+      zmsg_pushstr(reply, "no camera");
     }
+    zmsg_destroy(&request);
+
   }
   mdwrk_destroy (&session);
+  
   return;
 }
