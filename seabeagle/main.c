@@ -54,8 +54,10 @@ int main() {
   // config.identity = "n:1234";
 
   // same for this
-  // config.broker_endpoint = "tcp://au.ninjablocks.com:5773";
-  //   config.portwatcher_endpoint = "tcp://au.ninjablocks.com:5775";
+
+  printf("Binding to broker at %s\n", config.broker_endpoint);
+  printf("Binding to port-watcher at %s\n", config.portwatcher_endpoint);
+
   zctx_t * context = zctx_new();
   /*  The serial thread just reads from /dev/ttyO1 and publishes to an
    *  inproc socket. This could be done inline, but now we can test
@@ -73,7 +75,7 @@ int main() {
   zthread_attached_fn * independent_workers[2] = {camera};
 
   int i;
-  
+
   for(i = 0; i<1; i++ ) {
     parent_handshake(zthread_fork(context, independent_workers[i], (void*) &config));
   }
