@@ -98,9 +98,11 @@ void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_
 
 
 int falls_below(triggermemory_t * mem, int value) {
-  puts("falls below called\n");
+  zclock_log("falls below called: reset=%d, trigger=%d, value=%d", 
+             mem->reset_level, mem->trigger_level, value);
   if (mem->ready) {
     if (value  <= mem->trigger_level) {
+      zclock_log("trigger fires, deactivate");
       mem->ready = 0;
       return 1;
     } else {
@@ -108,6 +110,7 @@ int falls_below(triggermemory_t * mem, int value) {
     }
   } else {
     if (value >= mem->reset_level) {
+      zclock_log("trigger reactivates!");
       mem->ready = 1;
     }
     return 0;
@@ -116,9 +119,11 @@ int falls_below(triggermemory_t * mem, int value) {
 }
 
 int rises_above(triggermemory_t * mem, int value) {
-  puts("falls below called\n");
+  zclock_log("rises above called: reset=%d, trigger=%d, value=%d", 
+             mem->reset_level, mem->trigger_level, value);
   if (mem->ready) {
     if (value  >= mem->trigger_level) {
+      zclock_log("trigger fires, deactivate");
       mem->ready = 0;
       return 1;
     } else {
@@ -126,6 +131,7 @@ int rises_above(triggermemory_t * mem, int value) {
     }
   } else {
     if (value <= mem->reset_level) {
+      zclock_log("trigger reactivates!");
       mem->ready = 1;
     }
     return 0;
@@ -226,6 +232,7 @@ void trigger(void *cvoid,
         if(strcmp(channel, new_channel) == 0) {
         // oh, happy day! We're relevant again.
         // reactivate and start looking at reset levels.
+          zclock_log("changed channel from %s to %s: trigger coming back to life", channel, new_channel);
           zsockopt_set_subscribe(line, "VALUE");
           zsockopt_set_unsubscribe(line, "CHANNEL_CHANGE");
         }
@@ -236,7 +243,9 @@ void trigger(void *cvoid,
         int ival = atoi(value);
         if(strcmp(channel, update_channel) != 0) {
           // channel changed,  go dormant
-          // this is legit according to my tests at https://gist.github.com/2042350
+          // this is legit according to my tests at
+          // https://gist.github.com/2042350
+          zclock_log("changed channel from %s to %s: trigger going dormant", channel, update_channel);
           zsockopt_set_subscribe(line, "CHANNEL_CHANGE");
           zsockopt_set_unsubscribe(line, "VALUE");
         } 
@@ -244,6 +253,8 @@ void trigger(void *cvoid,
         else if(trigger_func(&trigger_memory, ival)) {
           send_trigger(client, target_worker, ival, user_id);
         }           
+        free(value);
+        free(update_channel);
       } else {
         // shouldn't ever happen.
         zclock_log("shouldn't have received command %s\n", zframe_strdup(cmd));
