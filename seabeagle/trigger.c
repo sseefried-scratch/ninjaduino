@@ -92,8 +92,8 @@ void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_
   // time
   msgpack_pack_int(pk, tval.tv_sec);
 
-  msgpack_pack_raw(pk, 5);
-  msgpack_pack_raw_body(pk, "micros", 5);
+  msgpack_pack_raw(pk, 6);
+  msgpack_pack_raw_body(pk, "micros", 6);
   // time
   msgpack_pack_int(pk, tval.tv_usec);
 
