@@ -30,12 +30,13 @@ send to "service_name"
 //   reset_level is optional
 //   anything else is ignored.
 int parse_trigger(msgpack_object * addins_obj, trigger_t * target) {
+  msgpack_object_print(stdout, *addins_obj);
   if (addins_obj->type != MSGPACK_OBJECT_MAP) {
     zclock_log("expected a hash at the top level, got %d",
                addins_obj->type);
     return 0;
   }
-
+  
   msgpack_object_map addins_hash = addins_obj->via.map;
   int i;
   int success = 0;
