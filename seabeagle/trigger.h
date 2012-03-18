@@ -10,17 +10,18 @@ typedef struct {
   int ready;
   int trigger_level;
   int reset_level;
+  int line_id;
 } triggermemory_t;
 
 
 
-typedef struct {
-  char * trigger_name;
-  int (*trigger)( triggermemory_t*, int); 
-  int line_id;
-  int trigger_level;
-  int reset_level;
-} trigger_t;
+/* typedef struct { */
+/*   char * trigger_name; */
+/*   int (*trigger)( triggermemory_t*, int);  */
+
+/*   int trigger_level; */
+/*   int reset_level; */
+/* } trigger_t; */
 
 // a trigger function is one that takes a trigger_memory and a new value,
 // then returns a bool to say whether or not it fired. may edit the

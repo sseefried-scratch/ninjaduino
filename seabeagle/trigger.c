@@ -29,7 +29,7 @@ send to "service_name"
 //   trigger_level is optional
 //   reset_level is optional
 //   anything else is ignored.
-int parse_trigger(msgpack_object * addins_obj, trigger_t * target) {
+int parse_trigger(msgpack_object * addins_obj, triggermemory_t * target) {
   msgpack_object_print(stdout, *addins_obj);
   if (addins_obj->type != MSGPACK_OBJECT_MAP) {
     zclock_log("expected a hash at the top level, got %d",
@@ -161,7 +161,7 @@ void trigger(void *cvoid,
   zclock_log("watch_port started!");
   msgpack_zone mempool;
   msgpack_zone_init(&mempool, 2048);
-  trigger_t trigger;
+
   // TODO
   char * user_id = "15"; 
   // TODO get broker in somehow
@@ -184,7 +184,7 @@ void trigger(void *cvoid,
   zmsg_destroy(&rule_details);
   msgpack_object * addins_obj = parse_msgpack(&mempool, addins);
   // triggerfunction * trigger_function = new_trigger(addins);
-  if(!parse_trigger(addins_obj, &trigger)) {
+  if(!parse_trigger(addins_obj, &trigger_memory)) {
     //bad message
     zclock_log("bad trigger definition");
     msgpack_object_print(stdout, *addins_obj);
@@ -205,7 +205,7 @@ void trigger(void *cvoid,
 
   // what line are we on?
   // this comes in the addins. 
-  char * linesocket = to_linesocket(trigger.line_id);
+  char * linesocket = to_linesocket(trigger_memory.line_id);
   zclock_log("trigger is listening on %s", linesocket);
   zsocket_connect(line, linesocket);
 
