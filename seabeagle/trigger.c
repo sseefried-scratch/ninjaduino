@@ -71,7 +71,8 @@ int parse_trigger(msgpack_object * addins_obj, triggermemory_t * target) {
 void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_id) {
   zclock_log("activating trigger\ntarget=%s\nvalue=%d\nuser=%s",
              target_worker, ival, user_id);
-
+  struct timeval tval;
+  gettimeofday(&tval, NULL);
   // make a messagepack hash
   msgpack_sbuffer * buffer =  msgpack_sbuffer_new();
   msgpack_packer* pk = msgpack_packer_new(buffer, msgpack_sbuffer_write);
@@ -86,10 +87,17 @@ void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_
   //time chunk
   msgpack_pack_map(pk, 1);
   // key
-  msgpack_pack_raw(pk, 4);
-  msgpack_pack_raw_body(pk, "time", 4);
+  msgpack_pack_raw(pk, 5);
+  msgpack_pack_raw_body(pk, "epoch", 5);
   // time
-  msgpack_pack_int(pk, gettime(NULL));
+  msgpack_pack_int(pk, tval.tv_sec);
+
+  msgpack_pack_raw(pk, 5);
+  msgpack_pack_raw_body(pk, "micros", 5);
+  // time
+  msgpack_pack_int(pk, tval.tv_usec);
+
+
   
 
 
@@ -103,8 +111,6 @@ void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_
 
   zmsg_pushmem(msg, buffer->data, buffer->size);
 
-  zclock_log("raw data from buffer");
-  msgpack_object_print(stdout, buffer.data);
 
   mdcli_send(client, target_worker, &msg);
 }
