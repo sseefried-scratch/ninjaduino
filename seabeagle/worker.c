@@ -80,12 +80,14 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
   zclock_log("worker connected!");
 
   while (1) {
+    zclock_log("worker servicing request");
     zmsg_t *request = mdwrk_recv (session, &reply);
     if (request == NULL)
       break;              //  Worker was interrupted
 
     char * command = zmsg_popstr(request);
     char * rule_id = zmsg_popstr(request);
+    reply = zmsg_new();
     if (strcmp(command, "AddTrigger") == 0) {
       zclock_log("new trigger!");
       if (zhash_lookup(rules, rule_id)) {
@@ -93,7 +95,7 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         // FIXME should probably delete this and reinstate
         zclock_log("Received duplicate rule %s, ignoring", rule_id);
         zmsg_destroy(&request);
-        reply = zmsg_new();
+
         zmsg_pushstr(reply, "duplicate");
       } else {
         // start a new rule thread
@@ -120,7 +122,6 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
       } else {
         // not there!
         zclock_log("Received delete trigger request for nonexistent rule %s, ignoring", rule_id);
-        reply = zmsg_new();
         zmsg_pushstr(reply, "rule not found");
         zmsg_destroy(&request);
       }
@@ -143,7 +144,6 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
     } else {
       zclock_log("Can't handle command %s: ignoring", command);
     }
-    reply = zmsg_new();
     zmsg_pushstr(reply, "ok");
     zmsg_destroy(&request);
 
