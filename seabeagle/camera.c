@@ -10,12 +10,13 @@ int camera_connected() {
 
 
 void camera(void * cvoid, zctx_t * context, void * pipe) {
-  zclock_log("worker trying to connect!");
+
   child_handshake(pipe);
   config_t * config = (config_t*) cvoid;
   char workername[512];
   void * data = malloc(2000000); // 2 mb enough?
   sprintf(workername, "%s:camera", config->identity);
+  zclock_log("worker %s trying to connect!", workername);
   mdwrk_t * session = mdwrk_new (config->broker_endpoint, workername, 0);
   while(1) {
     zmsg_t *reply = NULL;

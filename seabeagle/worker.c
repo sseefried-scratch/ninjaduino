@@ -67,7 +67,6 @@
 void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
   workerconfig_t *config = (workerconfig_t*) cvoid;
   zhash_t * rules = zhash_new();
-  zclock_log("worker trying to connect!");
   child_handshake(pipe);
   zmsg_t *reply = NULL;
   void * rule_pipe = NULL;
@@ -77,10 +76,10 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
                               strlen(channel) + 2);
   sprintf(servicename, "%s:%s", ninja,channel);
   mdwrk_t *session = mdwrk_new (config->base_config->broker_endpoint, servicename, 0);
-  zclock_log("worker connected!");
+  zclock_log("%s worker connected!", servicename);
 
   while (1) {
-    zclock_log("worker servicing request");
+    zclock_log("%s worker servicing request", servicename);
     zmsg_t *request = mdwrk_recv (session, &reply);
     if (request == NULL)
       break;              //  Worker was interrupted

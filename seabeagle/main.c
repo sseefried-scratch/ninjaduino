@@ -57,8 +57,8 @@ int main() {
    config.portwatcher_endpoint = "tcp://au.ninjablocks.com:5775";
   // same for this
 
-  printf("Binding to broker at %s\n", config.broker_endpoint);
-  printf("Binding to port-watcher at %s\n", config.portwatcher_endpoint);
+  printf("broker is  %s\n", config.broker_endpoint);
+  printf("port watcher is at %s\n", config.portwatcher_endpoint);
 
   zctx_t * context = zctx_new();
   /*  The serial thread just reads from /dev/ttyO1 and publishes to an
