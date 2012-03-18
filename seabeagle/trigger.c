@@ -48,7 +48,7 @@ int parse_trigger(msgpack_object * addins_obj, trigger_t * target) {
     }
     if(obj.type != MSGPACK_OBJECT_POSITIVE_INTEGER) {
       printf("obj expected raw, got %d\n", obj.type);
-      return 0; // can't be fooling with these silly data structures
+      continue;
     }
     int size = key.via.raw.size;
     const char * kstr = key.via.raw.ptr;
