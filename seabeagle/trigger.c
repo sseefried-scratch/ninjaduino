@@ -184,12 +184,16 @@ void trigger(void *cvoid,
   }
 
   void * line = zsocket_new(context, ZMQ_SUB);
-  zsockopt_set_unsubscribe(line, "");
-  zsockopt_set_subscribe(line, "VALUE");
+
 
   // what line are we on?
   // this comes in the addins. 
-  zsocket_connect(line, "TODO");
+  char * linesocket = to_linesocket(trigger.line_id);
+  zclock_log("trigger is listening on %s", linesocket);
+  zsocket_connect(line, linesocket);
+
+  zsockopt_set_unsubscribe(line, "");
+  zsockopt_set_subscribe(line, "VALUE");
   send_sync("ok", control);
   
   zmq_pollitem_t items [] = {
