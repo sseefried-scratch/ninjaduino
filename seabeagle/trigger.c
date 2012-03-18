@@ -85,7 +85,7 @@ void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_
   msgpack_pack_int(pk, ival);
 
   //time chunk
-  msgpack_pack_map(pk, 1);
+
   // key
   msgpack_pack_raw(pk, 5);
   msgpack_pack_raw_body(pk, "epoch", 5);
@@ -96,9 +96,6 @@ void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_
   msgpack_pack_raw_body(pk, "micros", 6);
   // time
   msgpack_pack_int(pk, tval.tv_usec);
-
-
-  
 
 
   zmsg_t * msg = zmsg_new();
