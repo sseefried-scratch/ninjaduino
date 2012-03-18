@@ -75,13 +75,24 @@ void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_
   // make a messagepack hash
   msgpack_sbuffer * buffer =  msgpack_sbuffer_new();
   msgpack_packer* pk = msgpack_packer_new(buffer, msgpack_sbuffer_write);
+  // value chunk
   msgpack_pack_map(pk, 1);
   // key
   msgpack_pack_raw(pk, 5);
   msgpack_pack_raw_body(pk, "value", 5);
   // value
   msgpack_pack_int(pk, ival);
+
+  //time chunk
+  msgpack_pack_map(pk, 1);
+  // key
+  msgpack_pack_raw(pk, 4);
+  msgpack_pack_raw_body(pk, "time", 4);
+  // time
+  msgpack_pack_int(pk, gettime(NULL));
   
+
+
   zmsg_t * msg = zmsg_new();
   // really, the user_id should be being added by a
   // gatekeeper, not the block itself, or it's a security
@@ -91,6 +102,10 @@ void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_
   // zmsg_pushmem(msg, &trigger.line_id, sizeof(int));
 
   zmsg_pushmem(msg, buffer->data, buffer->size);
+
+  zclock_log("raw data from buffer");
+  msgpack_object_print(stdout, buffer.data);
+
   mdcli_send(client, target_worker, &msg);
 }
 
@@ -119,11 +134,11 @@ int falls_below(triggermemory_t * mem, int value) {
 }
 
 int rises_above(triggermemory_t * mem, int value) {
+
   if (mem->ready) {
     if (value  >= mem->trigger_level) {
       zclock_log("rises above trigger fires: reset=%d, trigger=%d, value=%d", 
                  mem->reset_level, mem->trigger_level, value);
-      zclock_log("trigger fires, deactivate");
       mem->ready = 0;
       return 1;
     } else {
@@ -133,7 +148,6 @@ int rises_above(triggermemory_t * mem, int value) {
     if (value <= mem->reset_level) {
       zclock_log("rises above trigger resets: reset=%d, trigger=%d, value=%d", 
                  mem->reset_level, mem->trigger_level, value);
-      zclock_log("trigger reactivates!");
       mem->ready = 1;
     }
     return 0;
