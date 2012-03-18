@@ -18,31 +18,7 @@ send to "service_name"
 
 */
 
-typedef struct {
-  int ready;
-  int trigger_level;
-} triggermemory_t;
 
-typedef struct 
-{
-
-} triggertype_t;
-
-
-typedef struct {
-  char * trigger_name;
-  int (*trigger)( triggermemory_t*, int); 
-  int line_id;
-  int trigger_level;
-  int reset_level;
-} trigger_t;
-
-// a trigger function is one that takes a trigger_memory and a new value,
-// then returns a bool to say whether or not it fired. may edit the
-// trigger_memory in place.
-
-
-typedef int (*triggerfunction) (triggermemory_t *, int value); // C
 
 /* int trigger_fired(triggermemory_t *m, triggertype_t * ttype, char * value){ */
   
@@ -92,6 +68,9 @@ int parse_trigger(msgpack_object * addins_obj, trigger_t * target) {
 
 
 void send_trigger(mdcli_t * client, char * target_worker, char * raw_value, char * user_id) {
+  zclock_log("activating trigger\ntarget=%s\nvalue=%s\nuser=%s",
+             target_worker, raw_value, user_id);
+  
   zmsg_t * msg = zmsg_new();
   // really, the user_id should be being added by a
   // gatekeeper, not the block itself, or it's a security
@@ -105,7 +84,31 @@ void send_trigger(mdcli_t * client, char * target_worker, char * raw_value, char
 
 
 
-triggerfunction * find_trigger(char * channel, char * triggername){
+
+int falls_below(triggermemory_t * mem, int value) {
+  puts("falls below called\n");
+  if (mem->ready) {
+    if (value  <= mem->trigger_level) {
+      mem->ready = 0;
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    if (value >= mem->reset_level) {
+      mem->ready = 1;
+    }
+    return 0;
+  }
+
+}
+
+triggerfunction find_trigger(char * channel, char * triggername){
+  if (strcmp("light", channel) == 0) {
+    if (strcmp("light_level_falls_below", triggername) == 0) {
+      return &falls_below;
+    }
+  }
   return NULL;
 }
 
@@ -124,7 +127,7 @@ void trigger(void *cvoid,
   char * broker = "tcp://au.ninjablocks.com:5773";
   char * channel = config->channel;
   mdcli_t * client = mdcli_new(broker, 1); //VERBOSE
-  triggertype_t trigger_type;
+  //  triggertype_t trigger_type;
   // sort out comms with the overlord
   zmsg_t * rule_details = zmsg_recv(control);
   assert(zmsg_size(rule_details) == 5);
@@ -146,8 +149,9 @@ void trigger(void *cvoid,
     msgpack_object_print(stdout, *addins_obj);
     return;
   }
-  triggerfunction * trigger_func;
+  triggerfunction trigger_func;
   if(!(trigger_func = find_trigger(channel, trigger_name))) {
+
     zclock_log("no trigger found for channel %s, trigger %s",
                channel, trigger_name);
     return;
@@ -195,7 +199,7 @@ void trigger(void *cvoid,
           zsockopt_set_unsubscribe(line, "VALUE");
         } 
         
-        else if((*trigger_func)(&trigger_memory, atoi(value))) {
+        else if(trigger_func(&trigger_memory, atoi(value))) {
           send_trigger(client, target_worker, value, user_id);
         }           
       } else {

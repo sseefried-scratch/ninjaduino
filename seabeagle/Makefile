@@ -28,6 +28,8 @@ all:  seabeagle
 # test: test_filter
 test_vector: test_vector.o vector.o
 
+test_trigger: test_trigger.o trigger.o mdcliapi2.o msgpack_wrapper.o utils.o
+	gcc -g -o  test_trigger trigger.o test_trigger.o mdcliapi2.o msgpack_wrapper.o utils.o -lzmq -lczmq -lmsgpack
 # test_filter: test_filter.o filter.o cJSON.o line.o
 #	gcc -o test_filter filter.o test_filter.o cJSON.o line.o -lzmq
 #	-lczmq 
