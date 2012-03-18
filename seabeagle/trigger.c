@@ -104,10 +104,33 @@ int falls_below(triggermemory_t * mem, int value) {
 
 }
 
+int rises_above(triggermemory_t * mem, int value) {
+  puts("falls below called\n");
+  if (mem->ready) {
+    if (value  >= mem->trigger_level) {
+      mem->ready = 0;
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    if (value <= mem->reset_level) {
+      mem->ready = 1;
+    }
+    return 0;
+  }
+
+}
+
+
+
 triggerfunction find_trigger(char * channel, char * triggername){
   if (strcmp("light", channel) == 0) {
     if (strcmp("light_level_falls_below", triggername) == 0) {
       return &falls_below;
+    }
+    if (strcmp("light_level_rises_above", triggername) == 0) {
+      return &rises_above;
     }
   }
   return NULL;
