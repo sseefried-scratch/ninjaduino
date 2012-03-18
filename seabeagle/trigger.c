@@ -48,13 +48,13 @@ int parse_trigger(msgpack_object * addins_obj, trigger_t * target) {
       return 0;
     }
     if(obj.type != MSGPACK_OBJECT_POSITIVE_INTEGER) {
-      printf("obj expected raw, got %d\n", obj.type);
+      printf("obj expected positive integer, got %d\n", obj.type);
       continue;
     }
     int size = key.via.raw.size;
     const char * kstr = key.via.raw.ptr;
     int64_t o = obj.via.i64;
-    if        (strncmp(kstr, "line_id", size) == 0) {
+    if        (strncmp(kstr, "line", size) == 0) {
       target->line_id = o;
       printf("found line\n");
       success = 1;
