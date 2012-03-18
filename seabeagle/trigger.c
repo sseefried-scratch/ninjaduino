@@ -77,7 +77,7 @@ void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_
   msgpack_sbuffer * buffer =  msgpack_sbuffer_new();
   msgpack_packer* pk = msgpack_packer_new(buffer, msgpack_sbuffer_write);
   // value chunk
-  msgpack_pack_map(pk, 1);
+  msgpack_pack_map(pk, 3);
   // key
   msgpack_pack_raw(pk, 5);
   msgpack_pack_raw_body(pk, "value", 5);
