@@ -238,9 +238,11 @@ void trigger(void *cvoid,
         }
         free(new_channel);
       } else if (zframe_streq(cmd, "VALUE")) {
-        char * value = zmsg_popstr(msg);
+        zframe_t * vframe = zmsg_pop(msg);
+        int value;
+        memcpy(&value, zframe_data(vframe), sizeof(int));
         char * update_channel = zmsg_popstr(msg);
-        int ival = atoi(value);
+
         if(strcmp(channel, update_channel) != 0) {
           // channel changed,  go dormant
           // this is legit according to my tests at
@@ -250,10 +252,10 @@ void trigger(void *cvoid,
           zsockopt_set_unsubscribe(line, "VALUE");
         } 
         
-        else if(trigger_func(&trigger_memory, ival)) {
-          send_trigger(client, target_worker, ival, user_id);
+        else if(trigger_func(&trigger_memory, value)) {
+          send_trigger(client, target_worker, value, user_id);
         }           
-        free(value);
+
         free(update_channel);
       } else {
         // shouldn't ever happen.
