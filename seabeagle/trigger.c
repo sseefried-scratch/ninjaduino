@@ -108,7 +108,7 @@ void send_trigger(mdcli_t * client, char * target_worker, char * rule_id,  int i
 
   zmsg_pushmem(msg, buffer->data, buffer->size);
   zmsg_pushstr(msg, rule_id);
-
+  zmsg_pushstr(msg, "DoAction");
   mdcli_send(client, target_worker, &msg);
 }
 

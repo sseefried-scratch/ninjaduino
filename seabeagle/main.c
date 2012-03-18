@@ -46,13 +46,15 @@ int parse_config(config_t * config) {
 int main() {
 
   config_t config;
-  if(!parse_config(&config)) {
+  /*if(!parse_config(&config)) {
     fprintf(stderr, "bad config\n");
     exit(1);
   }
+*/
   // yes we need a better way of handling this.
-  // config.identity = "n:1234";
-
+   config.identity = "n:1234";
+   config.broker_endpoint = "tcp://au.ninjablocks.com:5773";
+   config.portwatcher_endpoint = "tcp://au.ninjablocks.com:5775";
   // same for this
 
   printf("Binding to broker at %s\n", config.broker_endpoint);
