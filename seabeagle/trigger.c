@@ -68,9 +68,19 @@ int parse_trigger(msgpack_object * addins_obj, trigger_t * target) {
 }
 
 
-void send_trigger(mdcli_t * client, char * target_worker, char * raw_value, char * user_id) {
-  zclock_log("activating trigger\ntarget=%s\nvalue=%s\nuser=%s",
-             target_worker, raw_value, user_id);
+void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_id) {
+  zclock_log("activating trigger\ntarget=%s\nvalue=%d\nuser=%s",
+             target_worker, ival, user_id);
+
+  // make a messagepack hash
+  msgpack_sbuffer * buffer =  msgpack_sbuffer_new();
+  msgpack_packer* pk = msgpack_packer_new(buffer, msgpack_sbuffer_write);
+  msgpack_pack_map(pk, 1);
+  // key
+  msgpack_pack_raw(pk, 5);
+  msgpack_pack_raw_body(pk, "value", 5);
+  // value
+  msgpack_pack_int(pk, ival);
   
   zmsg_t * msg = zmsg_new();
   // really, the user_id should be being added by a
@@ -79,7 +89,8 @@ void send_trigger(mdcli_t * client, char * target_worker, char * raw_value, char
   
   zmsg_pushstr(msg, user_id);
   // zmsg_pushmem(msg, &trigger.line_id, sizeof(int));
-  zmsg_pushstr(msg, raw_value);
+
+  zmsg_pushmem(msg, buffer->data, buffer->size);
   mdcli_send(client, target_worker, &msg);
 }
 
@@ -222,6 +233,7 @@ void trigger(void *cvoid,
       } else if (zframe_streq(cmd, "VALUE")) {
         char * value = zmsg_popstr(msg);
         char * update_channel = zmsg_popstr(msg);
+        int ival = atoi(value);
         if(strcmp(channel, update_channel) != 0) {
           // channel changed,  go dormant
           // this is legit according to my tests at https://gist.github.com/2042350
@@ -229,8 +241,8 @@ void trigger(void *cvoid,
           zsockopt_set_unsubscribe(line, "VALUE");
         } 
         
-        else if(trigger_func(&trigger_memory, atoi(value))) {
-          send_trigger(client, target_worker, value, user_id);
+        else if(trigger_func(&trigger_memory, ival)) {
+          send_trigger(client, target_worker, ival, user_id);
         }           
       } else {
         // shouldn't ever happen.
