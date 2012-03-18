@@ -18,8 +18,8 @@ void camera(void * cvoid, zctx_t * context, void * pipe) {
   sprintf(workername, "%s:camera", config->identity);
   zclock_log("worker %s trying to connect!", workername);
   mdwrk_t * session = mdwrk_new (config->broker_endpoint, workername, 0);
+  zmsg_t *reply = NULL;
   while(1) {
-    zmsg_t *reply = NULL;
     zmsg_t *request = mdwrk_recv (session, &reply);
     if (request == NULL)
       break;              //  Worker was interrupted
@@ -28,7 +28,8 @@ void camera(void * cvoid, zctx_t * context, void * pipe) {
       char * command = zmsg_popstr(request);
 
       if (strcmp(command, "TakePicture") == 0) {
-        if (!system("rm snap.jpg; uvccapture")) {
+        // if (!system("rm snap.jpg; uvccapture")) {
+        if (0!=system("ls")) {
           zclock_log("error taking photo");
         } else {
           
