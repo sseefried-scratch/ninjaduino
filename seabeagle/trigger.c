@@ -119,10 +119,10 @@ int falls_below(triggermemory_t * mem, int value) {
 }
 
 int rises_above(triggermemory_t * mem, int value) {
-  zclock_log("rises above called: reset=%d, trigger=%d, value=%d", 
-             mem->reset_level, mem->trigger_level, value);
   if (mem->ready) {
     if (value  >= mem->trigger_level) {
+      zclock_log("rises above trigger fires: reset=%d, trigger=%d, value=%d", 
+                 mem->reset_level, mem->trigger_level, value);
       zclock_log("trigger fires, deactivate");
       mem->ready = 0;
       return 1;
@@ -131,6 +131,8 @@ int rises_above(triggermemory_t * mem, int value) {
     }
   } else {
     if (value <= mem->reset_level) {
+      zclock_log("rises above trigger resets: reset=%d, trigger=%d, value=%d", 
+                 mem->reset_level, mem->trigger_level, value);
       zclock_log("trigger reactivates!");
       mem->ready = 1;
     }
