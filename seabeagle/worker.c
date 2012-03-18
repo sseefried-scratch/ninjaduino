@@ -104,10 +104,16 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         tconf->channel = channel;
         void * pipe = zthread_fork(context, trigger, &tconf);
         zmsg_send(&request, pipe);
-        recv_sync("ok", pipe);
-        zhash_insert(rules, rule_id, pipe);
-        zmsg_t * pipe_resp = zmsg_recv(pipe);
-        zmsg_destroy(&pipe_resp);
+
+        char * pipe_resp = zstr_recv(pipe);
+        zmsg_pushstr(reply, pipe_resp);
+
+        if(strcmp(pipe_resp, "ok") == 0) {
+          zhash_insert(rules, rule_id, pipe);
+        } else {
+          zclock_log("something went wrong creating a trigger: %s", pipe_resp);
+        }
+        free(pipe_resp);
         zmsg_destroy(&request);
 
       }

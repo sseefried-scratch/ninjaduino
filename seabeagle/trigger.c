@@ -147,6 +147,7 @@ void trigger(void *cvoid,
     //bad message
     zclock_log("bad trigger definition");
     msgpack_object_print(stdout, *addins_obj);
+    send_sync("bad trigger", control);
     return;
   }
   triggerfunction trigger_func;
@@ -154,6 +155,7 @@ void trigger(void *cvoid,
 
     zclock_log("no trigger found for channel %s, trigger %s",
                channel, trigger_name);
+    send_sync("no such trigger", control);
     return;
   }
 
