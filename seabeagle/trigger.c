@@ -68,7 +68,7 @@ int parse_trigger(msgpack_object * addins_obj, triggermemory_t * target) {
 }
 
 
-void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_id) {
+void send_trigger(mdcli_t * client, char * target_worker, char * rule_id,  int ival, char * user_id) {
   zclock_log("activating trigger\ntarget=%s\nvalue=%d\nuser=%s",
              target_worker, ival, user_id);
   struct timeval tval;
@@ -107,7 +107,7 @@ void send_trigger(mdcli_t * client, char * target_worker, int ival, char * user_
   // zmsg_pushmem(msg, &trigger.line_id, sizeof(int));
 
   zmsg_pushmem(msg, buffer->data, buffer->size);
-
+  zmsg_pushstr(msg, rule_id);
 
   mdcli_send(client, target_worker, &msg);
 }
@@ -272,7 +272,7 @@ void trigger(void *cvoid,
         } 
         
         else if(trigger_func(&trigger_memory, value)) {
-          send_trigger(client, target_worker, value, user_id);
+          send_trigger(client, target_worker, rule_id, value, user_id);
         }           
 
         free(update_channel);
