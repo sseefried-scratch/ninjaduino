@@ -46,3 +46,6 @@ depend:
 check-syntax:
 	gcc -o nul -S ${CHK_SOURCES}
 
+
+install: seabeagle
+	cp seabeagle /usr/bin

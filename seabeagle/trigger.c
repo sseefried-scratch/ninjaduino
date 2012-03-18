@@ -182,7 +182,7 @@ void trigger(void *cvoid,
   msgpack_zone_init(&mempool, 2048);
 
   // TODO
-  char * user_id = "15"; 
+  char * user_id = "17"; 
   // TODO get broker in somehow
   char * broker = "tcp://au.ninjablocks.com:5773";
   char * channel = config->channel;

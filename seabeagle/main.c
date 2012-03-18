@@ -12,15 +12,50 @@
 #include "worker_config.h"
 #include "camera.h"
 
+char * after_colon(char * buf) {
+  while(*buf) {
+    if(*buf == ':')  {
+      buf++;
+      while(*buf == ' ') buf++;
+      return buf;
+    }
+    buf++;
+  };
+  return NULL;
+}
+
+int parse_config(config_t * config) {
+  char buf[2048];
+  int nbytes=2047;
+  FILE * c = fopen("/etc/seabeagle.conf", "r");
+  while(getline(&buf, &nbytes, c)) {
+    if (strncmp("broker:", buf, 7)==0) {
+      config->broker_endpoint = strdup(after_colon(buf));
+    } else if  (strncmp("portwatcher:", buf, 12)==0) {
+      config->portwatcher_endpoint = strdup(after_colon(buf));
+    } else if (strncmp("identity:", buf, 9) == 0) {
+      config->identity = strdup(after_colon(buf));
+    } else {
+
+      return 0;
+    }
+  }
+  return 1;
+}
+
 int main() {
 
   config_t config;
+  if(!parse_config(&config)) {
+    fprintf(stderr, "bad config\n");
+    exit(1);
+  }
   // yes we need a better way of handling this.
-  config.identity = "n:1234";
+  // config.identity = "n:1234";
 
   // same for this
-  config.broker_endpoint = "tcp://au.ninjablocks.com:5773";
-  config.portwatcher_endpoint = "tcp://au.ninjablocks.com:5775";
+  // config.broker_endpoint = "tcp://au.ninjablocks.com:5773";
+  //   config.portwatcher_endpoint = "tcp://au.ninjablocks.com:5775";
   zctx_t * context = zctx_new();
   /*  The serial thread just reads from /dev/ttyO1 and publishes to an
    *  inproc socket. This could be done inline, but now we can test
