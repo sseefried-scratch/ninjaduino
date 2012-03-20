@@ -48,4 +48,4 @@ check-syntax:
 
 
 install: seabeagle
-	cp seabeagle /usr/bin
+	install seabeagle /usr/bin
