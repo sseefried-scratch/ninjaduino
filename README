@@ -1,0 +1,3 @@
+
+runs as 'ninja' user
+user must be a member of the 'dialout' group
