@@ -29,7 +29,7 @@ void camera(void * cvoid, zctx_t * context, void * pipe) {
 
       if (strcmp(command, "TakePicture") == 0) {
         // if (!system("rm snap.jpg; uvccapture")) {
-        if (0!=system("ls")) {
+        if (0!=system("rm snap.jpg; uvccapture")) {
           zclock_log("error taking photo");
         } else {
           
@@ -41,7 +41,6 @@ void camera(void * cvoid, zctx_t * context, void * pipe) {
       FILE * f = fopen("snap.jpg", "r");
       int bytes_read = fread(data, 1, 2000000, f);
       zmsg_pushmem(reply, data, bytes_read);
-      zmsg_pushstr(reply, "ok");
       zmsg_destroy(&request);
     } else {
       zclock_log("camera was unplugged while we were waiting for a request");
