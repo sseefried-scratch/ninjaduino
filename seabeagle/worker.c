@@ -41,6 +41,14 @@
    |_________________|
 
    ___________________________
+   | "AddAction"             |
+   | rule_id: integer        |
+   | action_name: string     |
+   | auth: msgpack           |
+   | addins: msgpack         |
+   |-------------------------|
+
+   ___________________________
    | "AddTrigger"            |
    | rule_id: integer        |
    | trigger_name: string    |
