@@ -50,7 +50,9 @@ check-syntax:
 install: seabeagle
 	install seabeagle /usr/bin
 	foreman export upstart /etc/init -a ninja
-	echo "start on filesystem or runlevel [2345]" >  n.conf
+	# this should probably be networking, really
+	# but this works and it's late. FIXME
+	echo "start on starting ssh" >  n.conf
 	echo "stop on runlevel [!2345]" >>  n.conf
 	cat /etc/init/ninja.conf >> n.conf
 	mv n.conf /etc/init/ninja.conf
