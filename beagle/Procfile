@@ -1,3 +1,0 @@
-relay: ./read_serial.sh
-uplink: ruby ninja_driver.rb  LD_LIBRARY_PATH=/usr/local/lib
-camera: ruby go.rb

@@ -1,7 +1,0 @@
-Build scripts
-doc weirdnesses (like setting LD_LIBRARY_PATH for libzmq (possibly install in /usr/lib?))
-RZMQ bugs - can't cancel timers. more wideranging thing.
-handle adding rules correctly rather than hacking it
-
-related
-  - fixes in overall structure so that we get rejected if we try to fake the rule_id or user_id
