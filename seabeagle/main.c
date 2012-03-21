@@ -17,6 +17,9 @@ char * after_colon(char * buf) {
     if(*buf == ':')  {
       buf++;
       while(*buf == ' ') buf++;
+      char * tmpbuf = buf;
+      while(*tmpbuf!='\n') tmpbuf++;
+      *tmpbuf='\0';
       return buf;
     }
     buf++;
@@ -25,38 +28,42 @@ char * after_colon(char * buf) {
 }
 
 int parse_config(config_t * config) {
-  char buf[2048];
-  int nbytes=2047;
+  char *buf=NULL;
+  unsigned int nbytes=2047;
   FILE * c = fopen("/etc/seabeagle.conf", "r");
-  while(getline(&buf, &nbytes, c)) {
+  assert(c);
+
+  config->broker_endpoint=NULL;
+  config->portwatcher_endpoint=NULL;
+  config->identity=NULL;
+
+  while(-1 != getline(&buf, &nbytes, c)) {
+    printf("read |%s|\n", buf);
     if (strncmp("broker:", buf, 7)==0) {
-      config->broker_endpoint = strdup(after_colon(buf));
+      config->broker_endpoint = after_colon(buf);
     } else if  (strncmp("portwatcher:", buf, 12)==0) {
       config->portwatcher_endpoint = strdup(after_colon(buf));
     } else if (strncmp("identity:", buf, 9) == 0) {
       config->identity = strdup(after_colon(buf));
-    } else {
 
-      return 0;
+    } else {
+      fprintf(stderr, "bad line: %s\n", buf);
+      free(buf);
     }
+    buf=NULL;
   }
-  return 1;
+  return (config->identity && config->broker_endpoint && config->portwatcher_endpoint);
 }
 
 int main() {
 
   config_t config;
-  /*if(!parse_config(&config)) {
+  if(!parse_config(&config)) {
     fprintf(stderr, "bad config\n");
     exit(1);
   }
-*/
-  // yes we need a better way of handling this.
-   config.identity = "n:1234";
-   config.broker_endpoint = "tcp://au.ninjablocks.com:5773";
-   config.portwatcher_endpoint = "tcp://au.ninjablocks.com:5775";
-  // same for this
-
+  
+  printf("identity is %s\n", config.identity);
   printf("broker is  %s\n", config.broker_endpoint);
   printf("port watcher is at %s\n", config.portwatcher_endpoint);
 
