@@ -49,7 +49,7 @@ check-syntax:
 
 install: seabeagle
 	install seabeagle /usr/bin
-	foreman export upstart /etc/init -a ninja
+	foreman export upstart /etc/init -a ninja -u ninja -d /tmp
 	# this should probably be networking, really
 	# but this works and it's late. FIXME
 	echo "start on starting ssh" >  n.conf
