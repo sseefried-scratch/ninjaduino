@@ -72,7 +72,6 @@ void watch_port(void *cvoid,
       
       zframe_t * value = zmsg_pop(msg);
       int res = *(int*)zframe_data(value);
-      zclock_log("res is %d", res);
       char * new_channel = zmsg_popstr(msg);
 
       if(strcmp(new_channel, config->channel)!=0) {
@@ -90,8 +89,7 @@ void watch_port(void *cvoid,
       zmsg_pushstr(to_send, buf);
       zmsg_pushstr(to_send, line_id);
       zmsg_pushstr(to_send, config->source_worker);
-
-      zmsg_dump(to_send);
+      zclock_log("%s sending line %s -> %s", config->source_worker, line_id, buf);
       zmsg_send(&to_send, lineout);
       // don't destroy value frame, now owned by zmsg
     }

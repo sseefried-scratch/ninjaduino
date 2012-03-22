@@ -258,7 +258,7 @@ void trigger(void *cvoid,
         if(strcmp(channel, new_channel) == 0) {
         // oh, happy day! We're relevant again.
         // reactivate and start looking at reset levels.
-          zclock_log("changed channel from %s to %s: trigger coming back to life", channel, new_channel);
+          zclock_log("line %d: changed channel from %s to %s: trigger coming back to life", trigger_memory.line_id, channel, new_channel);
           zsockopt_set_subscribe(line, "VALUE");
           zsockopt_set_unsubscribe(line, "CHANNEL_CHANGE");
         }
@@ -273,7 +273,8 @@ void trigger(void *cvoid,
           // channel changed,  go dormant
           // this is legit according to my tests at
           // https://gist.github.com/2042350
-          zclock_log("changed channel from %s to %s: trigger going dormant", channel, update_channel);
+
+          zclock_log("line %d: changed channel from %s to %s: trigger going dormant", trigger_memory.line_id, channel, update_channel);
           zsockopt_set_subscribe(line, "CHANNEL_CHANGE");
           zsockopt_set_unsubscribe(line, "VALUE");
         } 
