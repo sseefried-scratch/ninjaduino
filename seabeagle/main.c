@@ -20,6 +20,8 @@ int main() {
     fprintf(stderr, "bad config\n");
     exit(1);
   }
+
+
   
   printf("identity is %s\n", config.identity);
   printf("broker is  %s\n", config.broker_endpoint);
@@ -29,7 +31,12 @@ int main() {
   // NOT YET TODO
   //  config.identity = get_identity(context, &config);
 
-
+  // we don't want the camera sharing any thread info, because it'll
+  // be running system etc, and that seems to screw with the threads.
+  if (!fork()) {
+    camera(&config);
+    return 0;
+  }
 
   /*  The serial thread just reads from /dev/ttyO1 and publishes to an
    *  inproc socket. This could be done inline, but now we can test
@@ -44,17 +51,12 @@ int main() {
   // separate worker threads
   zclock_log("starting workers");
 
-  zthread_attached_fn * independent_workers[2] = {camera};
 
-  int i;
-
-  for(i = 0; i<1; i++ ) {
-    parent_handshake(zthread_fork(context, independent_workers[i], (void*) &config));
-  }
 
   // we also start workers for the analog lines. These are easy to
   // monitor, we can just pass a channel name.
   char * internal_channels[3] = { "distance", "light", "button" };
+  int i;
   for(i=0;i<3;i++) {
     workerconfig_t * wconf = malloc(sizeof(workerconfig_t));
     wconf->base_config = &config;

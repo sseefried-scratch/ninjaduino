@@ -9,10 +9,8 @@ int camera_connected() {
 
 
 
-void camera(void * cvoid, zctx_t * context, void * pipe) {
+void camera(config_t * config) {
 
-  child_handshake(pipe);
-  config_t * config = (config_t*) cvoid;
   char workername[512];
   void * data = malloc(2000000); // 2 mb enough?
   sprintf(workername, "%s:camera", config->identity);

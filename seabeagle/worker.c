@@ -88,11 +88,13 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
 
   while (1) {
     zmsg_t *request = mdwrk_recv (session, &reply);
+
     if (request == NULL)
       break;              //  Worker was interrupted
 
     char * command = zmsg_popstr(request);
     char * rule_id = zmsg_popstr(request);
+
     zclock_log("%s worker servicing request %s for rule %s", servicename,command,rule_id);
     reply = zmsg_new();
     if (strcmp(command, "AddTrigger") == 0) {

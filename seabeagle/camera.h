@@ -1,7 +1,8 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
+#include "config.h"
 
-void camera(void * cvoid, zctx_t * context, void * pipe);
+void camera(config_t *);
 
 #endif
 
