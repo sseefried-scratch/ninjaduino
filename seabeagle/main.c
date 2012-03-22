@@ -26,8 +26,8 @@ int main() {
   printf("port watcher is at %s\n", config.portwatcher_endpoint);
 
   zctx_t * context = zctx_new();
-
-  config.identity = get_identity(context, &config);
+  // NOT YET TODO
+  //  config.identity = get_identity(context, &config);
 
 
 
