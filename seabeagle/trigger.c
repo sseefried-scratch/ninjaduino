@@ -158,6 +158,10 @@ int rises_above(triggermemory_t * mem, int value) {
 
 }
 
+void dump_trigger(triggermemory_t * mem) {
+  zclock_log("line=%d,reset=%d, trigger=%d, ready=%d\n",
+             mem->line_id, mem->reset_level, mem->trigger_level,mem->ready);
+}
 
 
 triggerfunction find_trigger(char * channel, char * triggername){
@@ -210,6 +214,9 @@ void trigger(void *cvoid,
     send_sync("bad trigger", control);
     return;
   }
+  zclock_log("Creating trigger: target %s, rule_id %s, name %s", 
+             target_worker, rule_id, trigger_name);
+  dump_trigger(&trigger_memory);
   triggerfunction trigger_func;
   if(!(trigger_func = find_trigger(channel, trigger_name))) {
 

@@ -4,7 +4,9 @@ typedef struct {
   char * identity;
   char * broker_endpoint;
   char * portwatcher_endpoint;
+  char * registration_endpoint;
   // void * context;
-
+  
 } config_t;
+int parse_config(config_t * config) ;
 #endif

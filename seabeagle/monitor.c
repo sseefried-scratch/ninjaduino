@@ -76,8 +76,8 @@ void watch_port(void *cvoid,
       char * new_channel = zmsg_popstr(msg);
 
       if(strcmp(new_channel, config->channel)!=0) {
-        zclock_log("listening for %s, channel changed to %s, monitor quitting",
-                   config->channel, new_channel);
+        zclock_log("monitor on %d: listening for %s, channel changed to %s quitting",
+                   config->line_id, config->channel, new_channel);
         zmsg_destroy(&msg);
         zframe_destroy(&cmd);
         break;
@@ -99,7 +99,6 @@ void watch_port(void *cvoid,
     zmsg_destroy(&msg);
     zframe_destroy(&cmd);
   }
-  zclock_log("line %d dying", config->line_id);
   //cleanup
   zsocket_destroy(context, linein);
   zsocket_destroy(context, lineout);
