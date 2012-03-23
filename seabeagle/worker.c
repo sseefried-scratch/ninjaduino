@@ -126,7 +126,7 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         zmsg_destroy(&request);
 
       }
-    } else if (strcmp(command,"DeleteTrigger") == 0) {
+    } else if (strcmp(command,"RemoveRule") == 0) {
       if (rule_pipe=zhash_lookup(rules, rule_id)) {
         // found it
         send_sync("DESTROY",pipe);
