@@ -299,8 +299,9 @@ void trigger(void *cvoid,
       zmsg_destroy(&msg);
       
       if (strcmp("DESTROY", str) == 0) {
+        zclock_log("rule %s will quit on request", rule_id);
         free(str);
-        send_sync("ok", control);
+        send_sync("OK", control);
         zclock_log("rule %s quitting on request", rule_id);
         break;
       } else  {
