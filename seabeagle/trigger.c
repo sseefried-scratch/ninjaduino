@@ -292,6 +292,7 @@ void trigger(void *cvoid,
       zframe_destroy(&cmd);
     }
     if (items[1].revents & ZMQ_POLLIN) {
+      zclock_log("rule %s received message on control pipe", rule_id);
       // control message
       // really only expecting DESTROY
       zmsg_t * msg = zmsg_recv(control);
@@ -307,6 +308,7 @@ void trigger(void *cvoid,
       } else  {
         zclock_log("unexpected command %s for rule %s", str, rule_id);
         free(str);
+        send_sync("OK", control);
       }
     }
     
