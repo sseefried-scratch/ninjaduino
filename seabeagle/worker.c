@@ -111,14 +111,14 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         zmsg_pushstr(request, rule_id);
         triggerconfig_t * tconf = malloc(sizeof(triggerconfig_t));
         tconf->channel = channel;
-        void * rule_pipe = zthread_fork(context, trigger, tconf);
+        rule_pipe = zthread_fork(context, trigger, tconf);
         zmsg_send(&request, rule_pipe);
 
         char * pipe_resp = zstr_recv(rule_pipe);
         zmsg_pushstr(reply, pipe_resp);
 
         if(strcmp(pipe_resp, "ok") == 0) {
-          zhash_insert(rules, rule_id, pipe);
+          zhash_insert(rules, rule_id, rule_pipe);
         } else {
           zclock_log("something went wrong creating a trigger: %s", pipe_resp);
         }
@@ -154,10 +154,10 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         mconf->source_worker = servicename;
         mconf->out_socket = config->base_config->portwatcher_endpoint;
         mconf->channel = channel;
-        void * pipe = zthread_fork(context, watch_port, (void*)mconf);
-        send_sync("ping", pipe);
-        recv_sync("pong", pipe);
-        zsocket_destroy(context, pipe);
+        void * monitor_pipe = zthread_fork(context, watch_port, (void*)mconf);
+        send_sync("ping", monitor_pipe);
+        recv_sync("pong", monitor_pipe);
+        zsocket_destroy(context, monitor_pipe);
       }
       
     } else {
