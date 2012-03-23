@@ -97,6 +97,8 @@ void watch_port(void *cvoid,
     zmsg_destroy(&msg);
     zframe_destroy(&cmd);
   }
+  zclock_log("monitor on %d: listening for %s, expiring naturally",
+             config->line_id, config->channel);
   //cleanup
   zsocket_destroy(context, linein);
   zsocket_destroy(context, lineout);
