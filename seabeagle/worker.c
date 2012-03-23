@@ -111,10 +111,10 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         zmsg_pushstr(request, rule_id);
         triggerconfig_t * tconf = malloc(sizeof(triggerconfig_t));
         tconf->channel = channel;
-        void * pipe = zthread_fork(context, trigger, tconf);
-        zmsg_send(&request, pipe);
+        void * rule_pipe = zthread_fork(context, trigger, tconf);
+        zmsg_send(&request, rule_pipe);
 
-        char * pipe_resp = zstr_recv(pipe);
+        char * pipe_resp = zstr_recv(rule_pipe);
         zmsg_pushstr(reply, pipe_resp);
 
         if(strcmp(pipe_resp, "ok") == 0) {

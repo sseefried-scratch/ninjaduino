@@ -299,16 +299,16 @@ void trigger(void *cvoid,
       char * str = zmsg_popstr(msg);
       zmsg_destroy(&msg);
       
-      if (strcmp("DESTROY", str) == 0) {
+      if (strcmp("Destroy", str) == 0) {
         zclock_log("rule %s will quit on request", rule_id);
         free(str);
-        send_sync("OK", control);
+        send_sync("ok", control);
         zclock_log("rule %s quitting on request", rule_id);
         break;
       } else  {
         zclock_log("unexpected command %s for rule %s", str, rule_id);
         free(str);
-        send_sync("OK", control);
+        send_sync("ok", control);
       }
     }
     
