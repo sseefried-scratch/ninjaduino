@@ -9,7 +9,9 @@ int camera_connected() {
 }
 
 
-
+// TODO currently, if we lose the camera while waiting for a request, we never reply.
+// it would be nice to be polite and let the client know explicitly that it failed.
+// this will do for now though.
 void camera(config_t * config) {
 
   char workername[512];
@@ -39,8 +41,11 @@ void camera(config_t * config) {
       if (strcmp(command, "TakePicture") == 0) {
         // still a race condition here. would be lovely if uvccapture
         // didn't segfault. FIX when we have time
-        if (0!=system("rm snap.jpg; [ -e /dev/video0 ] &&  uvccapture")) {
+        if (0!=system("rm -f snap.jpg; [ -e /dev/video0 ] &&  uvccapture")) {
           zclock_log("error taking photo");
+          zmsg_pushstr(reply, "failed");
+          zmsg_destroy(&request);
+          break;
         } else {
           
         }
@@ -53,8 +58,8 @@ void camera(config_t * config) {
       zmsg_pushmem(reply, data, bytes_read);
       zmsg_destroy(&request);
     }
+    reply = NULL;
     mdwrk_destroy (&session);
     zclock_log("camera became unavailable");
-    zmsg_pushstr(reply, "no camera");
   }
 }
