@@ -127,8 +127,10 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
 
       }
     } else if (strcmp(command,"RemoveRule") == 0) {
+
       if (rule_pipe=zhash_lookup(rules, rule_id)) {
         // found it
+        zclock_log("rule %s exists, removing.", rule_id);
         send_sync("DESTROY",pipe);
         recv_sync("OK", pipe);
         zsocket_destroy(context, pipe);
