@@ -132,10 +132,12 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         // found it
         zclock_log("rule %s exists, removing.", rule_id);
         send_sync("DESTROY",pipe);
+        zclock_log("rule %s waiting for OK from pipe", rule_id);
         recv_sync("OK", pipe);
         zsocket_destroy(context, pipe);
         zhash_delete(rules, rule_id);
         zmsg_destroy(&request);
+        zclock_log("rule %s completely destroyed", rule_id);
       } else {
         // not there!
         zclock_log("Received delete trigger request for nonexistent rule %s, ignoring", rule_id);
