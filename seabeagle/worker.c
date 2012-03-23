@@ -131,10 +131,10 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
       if (rule_pipe=zhash_lookup(rules, rule_id)) {
         // found it
         zclock_log("rule %s exists, removing.", rule_id);
-        send_sync("DESTROY",pipe);
+        send_sync("Destroy",rule_pipe);
         zclock_log("rule %s waiting for OK from pipe", rule_id);
-        recv_sync("OK", pipe);
-        zsocket_destroy(context, pipe);
+        recv_sync("ok", rule_pipe);
+        zsocket_destroy(context, rule_pipe);
         zhash_delete(rules, rule_id);
         zmsg_destroy(&request);
         zclock_log("rule %s completely destroyed", rule_id);
