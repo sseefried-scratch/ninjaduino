@@ -22,6 +22,10 @@ int red = 7;
 int green = 8;
 int blue = 9;
 
+const int RED_LED_PIN = 7;
+const int GREEN_LED_PIN = 8;
+const int BLUE_LED_PIN = 9;
+
 int valueID1 = 0;
 int valueID2 = 0;
 int valueID3 = 0;
@@ -229,6 +233,12 @@ void setup()
   regRead(REG_WHO_AM_I, &b);
   //Serial.print("WHO_AM_I=");
   ////Serial.println(b,HEX);
+  pinMode(7, OUTPUT);   
+  pinMode(8, OUTPUT);   
+  pinMode(9, OUTPUT);
+digitalWrite(7, HIGH);   // set the LED on
+digitalWrite(8, HIGH);   // set the LED on
+digitalWrite(9, HIGH);   // set the LED on
 }
 
 
@@ -293,26 +303,7 @@ if (ports != NULL){
    printProgStr( FORMAT_FAILED_STRING);
    return;
  }
-  //if (fmt != NULL) {
-  //  printProgStr( ADDING_FORMAT_STRING);
-  //  aJson.addItemToObject(root, "format", fmt);
-  //  printProgStr( ADDING_TYPE_STRING);
-  //  aJson.addStringToObject(fmt, "type", "rect");
-  //  printProgStr( ADDING_WIDTH_STRING);
-  //  aJson.addNumberToObject(fmt, "width", 1920);
-  //  printProgStr( ADDING_HEIGHT_STRING);
-  //  aJson.addNumberToObject(fmt, "height", 1080);
-  //  printProgStr( ADDING_INTERLACE_STRING);
-  //  aJson.addFalseToObject(fmt, "interlace");
-  //  printProgStr( ADDING_FRAMERATE_STRING);
-  //  aJson.addNumberToObject(fmt, "frame rate", 24);
-  //  printProgStr( ADDING_LENGTH_STRING);
-  //  aJson.addNumberToObject(fmt, "length", 1.29);
-  //} 
-  //else {
-  //  printProgStr( FORMAT_FAILED_STRING);
-  //  return;
-  //}
+
 
   freeMem("with object");
   //printProgStr( RESULT_PRINTING_STRING);
@@ -332,92 +323,77 @@ if (ports != NULL){
   //freeMem("after deletion");
 }
 
+// code for serial read string ///////////////////////////////////////////
+#define slen 7        // 7 characters, e.g. ‘#ff6666′
+char serInStr[slen];  // array to hold the incoming serial string bytes
+
+//read a string from the serial and store it in an array
+int readSerialString () {
+int i=0;
+if(!Serial.available()) {
+return -1;
+}
+while (Serial.available() && i < slen) {
+int c = Serial.read();
+serInStr[i++] = c;
+}
+Serial.println(serInStr);
+return i;
+}
+
+
+////////////////////////////////////////////////////////
+
+
 void loop()
 {
-
- 
-  
-	//aJson.addItemToObject(root, "temperature", fmt = aJson.createObject());
-	//aJson.addStringToObject(fmt,"type",		"rect");
-	//aJson.addNumberToObject(fmt,"width",		1920);
-	//aJson.addNumberToObject(fmt,"height",		1080);
-	//aJson.addFalseToObject (fmt,"interlace");
-	//aJson.addNumberToObject(fmt,"frame rate",	24);
-	////Serial.println(aJson.print(root));
-	//aJson.deleteItem(root);
-	////freeMem("the memory: ");
-	delay(10);
-	
+  unsigned long color;
+  delay(10);
   testObjects();
+  int spos = readSerialString();
+
+  if(spos==slen && serInStr[0] == '#') {
+  long colorVal = strtol(serInStr+1,NULL,16);
+  Serial.print("setting color to r:");
+  Serial.print((colorVal&0xff0000)>>16);
+  Serial.print(" g:");
+  Serial.print((colorVal&0x00ff00)>>8);
+  Serial.print(" b:");
+  Serial.println((colorVal&0x0000ff)>>0);
+  memset(serInStr,0,slen);      // indicates we’ve used this string
+  //spos = 0;
 
 
- //Serial.print("{\"i2c\":[{\"accelerometer\":{\"x\":");
- //Serial.print(x);
- //Serial.print(",\"y\":");
- //Serial.print(y);
- //Serial.print(",\"z\":");
- //Serial.print(z);
- //Serial.print("}},{\"temperature\":");
- 
- //Serial.print(sen.getTemperature());
- ////Serial.println("0}]}");
+  analogWrite(RED_LED_PIN, 255-int((colorVal&0xff0000)>>16) );
+  analogWrite(GREEN_LED_PIN, 255-int((colorVal&0x00ff00)>>8) );
+  analogWrite(BLUE_LED_PIN, 255-int((colorVal&0x0000ff)>>0) );
 
- //char* sensorType = sen.idTheType(analogRead(IDPinCon1));
- //   int senval1 = sen.getSensorValue(1, sensorType);
- //   Serial.print("-------------->");
- //   //Serial.println(senval1);
- //DHT22_ERROR_t errorCode;
- //
- // // The sensor can only be read from every 1-2s, and requires a minimum
- // // 2s warm-up after power-on.
- // delay(2000);
- //
- // Serial.print("Requesting data...");
- // errorCode = myDHT22.readData();
- // switch(errorCode)
- // {
- //   case DHT_ERROR_NONE:
- //     Serial.print("Got Data ");
- //     Serial.print(myDHT22.getTemperatureC());
- //     Serial.print("C ");
- //     Serial.print(myDHT22.getHumidity());
- //     Serial.println("%");
- //     // Alternately, with integer formatting which is clumsier but more compact to store and
- //     // can be compared reliably for equality:
- //     //	  
- //     char buf[128];
- //     sprintf(buf, "Integer-only reading: Temperature %hi.%01hi C, Humidity %i.%01i %% RH",
- //                  myDHT22.getTemperatureCInt()/10, abs(myDHT22.getTemperatureCInt()%10),
- //                  myDHT22.getHumidityInt()/10, myDHT22.getHumidityInt()%10);
- //     Serial.println(buf);
- //     break;
- //   case DHT_ERROR_CHECKSUM:
- //     Serial.print("check sum error ");
- //     Serial.print(myDHT22.getTemperatureC());
- //     Serial.print("C ");
- //     Serial.print(myDHT22.getHumidity());
- //     Serial.println("%");
- //     break;
- //   case DHT_BUS_HUNG:
- //     Serial.println("BUS Hung ");
- //     break;
- //   case DHT_ERROR_NOT_PRESENT:
- //     Serial.println("Not Present ");
- //     break;
- //   case DHT_ERROR_ACK_TOO_LONG:
- //     Serial.println("ACK time out ");
- //     break;
- //   case DHT_ERROR_SYNC_TIMEOUT:
- //     Serial.println("Sync Timeout ");
- //     break;
- //   case DHT_ERROR_DATA_TIMEOUT:
- //     Serial.println("Data Timeout ");
- //     break;
- //   case DHT_ERROR_TOOQUICK:
- //     Serial.println("Polled to quick ");
- //     break;
- // }
+
+  }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //Code to print out the free memory
 
