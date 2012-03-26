@@ -245,6 +245,7 @@ void trigger(void *cvoid,
 
   zsockopt_set_unsubscribe(line, "");
   zsockopt_set_subscribe(line, "VALUE");
+  recv_sync("ping", control);
   send_sync("pong", control);
   
   zmq_pollitem_t items [] = {
