@@ -110,6 +110,7 @@ addins string);", NULL, NULL, &zErrMsg);
 typedef struct {
   zhash_t * rules;
   zctx_t * context;
+  char * channel;
 } rulepackage_t;
 
 
@@ -147,16 +148,17 @@ int load_rule(void *rvoid, int argc, char ** argv,  char ** column) {
   tconf->target_worker = strdup(argv[2]);
   tconf->auth          = strdup(argv[3]);
   tconf->addins        = strdup(argv[4]);
+  tconf->channel       = strdup(rpkg->channel);
   // FIXME auth and addins are blobs. how do we pull them out?
 
   create_trigger(rpkg->rules, argv[0], rpkg->context, tconf);
 }
 
-void reload_rules(zctx_t * context, sqlite3 * db, char * servicename, zhash_t * rules) {
+void reload_rules(zctx_t * context, sqlite3 * db, char * servicename, char * channel, zhash_t * rules) {
 
   char *zErrMsg = 0;
   int rc;
-  rulepackage_t rpkg = {rules, context};
+  rulepackage_t rpkg = {rules, context, channel};
   rc=sqlite3_exec(db, "select rule_id,trigger_name,target_worker,auth,addins from rules", load_rule, &rpkg, &zErrMsg);
   if(rc!=0) {
     // not necessarily a problem - if we've never written to the db,
@@ -190,7 +192,7 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
   zclock_log("%s worker preparing rules...", servicename);
   sqlite3_prepare_v2(db, "insert into rules VALUES (@RULEID, @TRIGGER_NAME, @TARGET_WORKER, @AUTH, @ADDINS);", 512, &insert_stmt, NULL);
   zclock_log("%s worker reloading rules...", servicename);
-  reload_rules(context, db, servicename, rules);
+  reload_rules(context, db, servicename, channel, rules);
   zclock_log("%s worker connecting...", servicename);
   mdwrk_t *session = mdwrk_new (config->base_config->broker_endpoint, servicename, 0);
   zclock_log("%s worker connected!", servicename);
