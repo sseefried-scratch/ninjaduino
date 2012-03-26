@@ -102,17 +102,6 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
     //fflush(stdout);
     assert(strcmp(recv_topic, topic)==0);
     free(recv_topic);
-    /* zframe_t * cmd = zmsg_pop(msg); */
-
-    /* // this is probably a bit over-keen - we could just send a string */
-    /* // rather than an enum. */
-    /* switch((line_message_type_t)zframe_data(cmd)) { */
-    /*   /\* on an update, we check the monitors and triggers * */
-    /*    * a trigger may fire, a monitor may be on.         * */
-    /*    * we may also have received an update of our       * */
-    /*    * accessory.                                       *\/ */
-    /* case SERIAL_UPDATE: */
-    /*   /\* expect to be sent two messages: value and type *\/ */
     assert(zmsg_size(msg) == 2);
       
     char * channel = zmsg_popstr(msg);
@@ -143,50 +132,4 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
     
   }
   free(config);
-
-    /*   break; */
-    /*   // TODO this isn't the job of the filter */
-    /* case MONITOR_ON: */
-    /*   // create a pthread, wait till we've synchronised.  */
-    /*   // delaying main thread while syncing is overhead but */
-    /*   // acceptable, and necessary for correctness. */
-      
-    /*   chan = zmsg_pop(msg); */
-    /*   if (zframe_streq(chan, channel_memory.current_channel)) { */
-    /*   } else { */
-    /*     zclock_log("ignoring request for monitor: wrong channel requested"); */
-    /*   } */
-      
-    /*   break; */
-    /*   // TODO this isn't the job of the filter */
-    /* case MONITOR_OFF:  */
-    /*   s_send(monitor_controller, "CLEAR_MONITORS"); */
-    /*   break; */
-    /*   // TODO this isn't the job of the filter */
-    /* case TRIGGER_ON:  */
-    /*   // create a pthread, wait till we've synchronised, */
-    /*   // pass it whatever it needs. TODO */
-    /*   { */
-    /*     void * pipe = zthread_fork(context, trigger, (void*)config); */
-    /*     s_send(pipe, channel_memory.current_channel); */
-    /*     // TODO what else does a channel need? */
-    /*     char * ok = s_recv(pipe); */
-    /*     assert(strcmp(ok, "ok") == 0); */
-    /*     free(ok); */
-    /*     zsocket_destroy(context, pipe); */
-    /*     break; */
-    /*   } */
-    /*   // TODO this isn't the job of the filter */
-    /* case TRIGGER_OFF: */
-    /*   rule_id = zmsg_popstr(msg); */
-    /*   s_sendmore(monitor_controller, "CLEAR_TRIGGER"); */
-    /*   s_send(monitor_controller, rule_id); */
-    /*   free(rule_id); */
-    /*   break; */
-    /* default: */
-    /*   str = zframe_strdup(cmd); */
-    /*   fprintf(stderr, "don't understand message %s; dropping\n", str); */
-    /*   free(str); */
-    /* } */
-  
 }

@@ -154,6 +154,8 @@ int load_rule(void *rvoid, int argc, char ** argv,  char ** column) {
   create_trigger(rpkg->rules, argv[0], rpkg->context, tconf);
 }
 
+// very important that this doesn't get called until all lines have
+// been initialised.
 void reload_rules(zctx_t * context, sqlite3 * db, char * servicename, char * channel, zhash_t * rules) {
 
   char *zErrMsg = 0;

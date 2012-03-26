@@ -13,8 +13,7 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
   // config_t * config = (config_t*) cvoid;
   void * serial = zsocket_new(context, ZMQ_SUB);
   zsocket_connect(serial, "inproc://raw_serial");
-  child_handshake(pipe);
-  zsocket_destroy(context, pipe);
+
   // unnecessary: we start with an empty subscription.
   // zmq_setsockopt (serial, ZMQ_SUBSCRIBE, "", 1);
   int i;
@@ -85,5 +84,16 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
     }
     cJSON_Delete(root);
     zmsg_destroy(&msg);
+    
+    // we need to ensure that we've gone through at least one
+    // iteration so all of the line listeners have been created
+    // else we'll try to connect to lines that don't exist yet, and
+    // sadness will result.
+    
+    if(pipe) {
+      child_handshake(pipe);
+      zsocket_destroy(context, pipe);
+      pipe=NULL;
+    }
   }
 }
