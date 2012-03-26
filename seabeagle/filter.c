@@ -29,8 +29,8 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       zclock_log("filter quitting!");
       return;
     }
-    // ephemeral storage, but we'll copy what we want out of
-    // the json sturcture.
+    // ephemeral storage, so we'll copy what we want out of
+    // the json structure
     cJSON * root = cJSON_Parse(data);
     free(data);
     if (!root) {
@@ -63,7 +63,6 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
         // line listener owns the config
         zclock_log("filter: starting line listener on port %d\n", i);
         lineconfig_t * lineconfig = malloc(sizeof(lineconfig_t));
-        //         lineconfig->inpipe = "inproc://line";
         lineconfig->line_id = i;
         void * pipe = zthread_fork(context, line_listener, (void*)lineconfig);
         parent_handshake(pipe);

@@ -1,5 +1,7 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
+#include <czmq.h>
+
 typedef struct {
   char * identity;
   char * broker_endpoint;
@@ -9,5 +11,5 @@ typedef struct {
   
 } config_t;
 
-int get_config(config_t * config);
+int get_config(zctx_t * context, config_t * config);
 #endif

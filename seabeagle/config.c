@@ -21,10 +21,10 @@ char * after_colon(char * buf) {
   return NULL;
 }
 
-int parse_config(config_t * config) {
+int parse_config(config_t * config, FILE * c) {
   char *buf=NULL;
   ssize_t nbytes=2047;
-  FILE * c = fopen("/etc/seabeagle.conf", "r");
+  //  FILE * c = fopen("/etc/seabeagle.conf", "r");
   assert(c);
 
   config->broker_endpoint=NULL;
@@ -51,14 +51,15 @@ int parse_config(config_t * config) {
   return (config->identity && config->broker_endpoint && config->portwatcher_endpoint);
 }
 
- 
+int get_identity_from_broker(zctx_t * context, config_t * config) {
+  return 1;
+}
+
 int config_callback(void *cvoid, int argc, char **argv, char **column){
   config_t * config = (config_t *) cvoid;
   if(argc == 0) {
-    // not configured yet, go into registration TODO
-    // for the moment, just read off the config file.
-
-    return 1;
+    // don't want to abort the call, just return.
+    return 0;
   }
   fprintf(stderr, "argc is %d\n", argc);
   config->identity = strdup(argv[0]);
@@ -67,7 +68,22 @@ int config_callback(void *cvoid, int argc, char **argv, char **column){
   return 0;
 }
 
-int get_config(config_t * config) {
+int record_config(sqlite3 * db, config_t * config) {
+    // put it back in!
+    char sqlbuf[2048];
+    char * zErrMsg;
+    int rc;
+    sprintf(sqlbuf, "insert into config (identity, broker, portwatcher) values ('%s', '%s', '%s');",
+            config->identity, config->broker_endpoint, config->portwatcher_endpoint);
+    printf("%s\n", sqlbuf);
+    rc = sqlite3_exec(db, sqlbuf, NULL, NULL, &zErrMsg);
+    if(rc!=0) {
+      zclock_log("couldn't write to db, giving up: errno %d, msg %s", rc, zErrMsg);
+      return 1;
+    }
+}
+
+int get_config(zctx_t * context, config_t * config) {
   sqlite3 *db;
   char *zErrMsg = 0;
   int rc;
@@ -84,22 +100,37 @@ int get_config(config_t * config) {
     zclock_log("couldn't write to db, giving up: errno %d, msg %s", rc, zErrMsg);
     return 1;
   }
+  // Our only piece of local configuration outside the database is the 
+  // block registrar. First thing we do is to connect to it, possibly
+  // with the identity pulled from the db, and confirm/get a new id.
+
+  // this should also mean that it will be possible to write
+  // all-encompassing testing code.
+
   if(!config->identity) {
+    // not configured yet, go into registration TODO
+    //  this is a bit awkward: we need to have the endpoint we're
+    //  going to ask for, at the very least. perhaps this is the only
+    //  thing that should live in the file config.
+   
+    // also, even for registered ninjablocks, we should still get the
+    // broker/portwatcher/whatever endpoints from the registrar.
+    // that way, if the broker falls out of communication for a long
+    // time, we can ask the registrar for new details.
+    
+    
+    if(0!=get_identity_from_broker(context, config)) {
+      fprintf(stderr, "failed to get an identity from the broker");
+      exit(1);
+    }
+    // for the moment, just read off the config file.
     fprintf(stderr, "nothing in db, let's have a go from file\n");
-    if(!parse_config(config)) {
+    FILE * c = fopen("/etc/seabeagle.conf", "r");
+    if(!parse_config(config, c)) {
       fprintf(stderr, "bad config\n");
       exit(1); 
     }
-    // put it back in!
-    char sqlbuf[2048];
-    sprintf(sqlbuf, "insert into config (identity, broker, portwatcher) values ('%s', '%s', '%s');",
-            config->identity, config->broker_endpoint, config->portwatcher_endpoint);
-    printf("%s\n", sqlbuf);
-    rc = sqlite3_exec(db, sqlbuf, NULL, NULL, &zErrMsg);
-    if(rc!=0) {
-      zclock_log("couldn't write to db, giving up: errno %d, msg %s", rc, zErrMsg);
-      return 1;
-    }
+    record_config(db, config);
   }
 
   fprintf(stderr, "rc is %d\n", rc);

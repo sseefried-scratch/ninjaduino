@@ -1,6 +1,8 @@
 # define the C source files
 SRCS = filter.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.c worker.c mdwrkapi.c camera.c msgpack_wrapper.c mdcliapi2.c identity.c config.c
 
+TESTSRCS=test_trigger.c test_config.c
+TESTOBJS = $(TESTSRCS:.c=.o)
 # define the C object files 
 #
 # This uses Suffix Replacement within a macro:
@@ -41,8 +43,8 @@ depend:
 check-syntax:
 	gcc -o nul -S ${CHK_SOURCES}
 
-tester: tester.o test_trigger.o $(OBJS)
-	gcc -g -o  tester tester.o test_trigger.o $(OBJS) $(LDFLAGS)
+tester: tester.o $(TESTOBJS) $(OBJS)
+	gcc -g -o  tester tester.o $(TESTOBJS) $(OBJS) $(LDFLAGS)
 
 test: tester
 	./tester

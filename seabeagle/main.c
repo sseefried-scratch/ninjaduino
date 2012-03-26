@@ -20,7 +20,7 @@ int main() {
   zctx_t * context = zctx_new();
   // let's assume the magical code fairies Do The Right Thing
   // in terms of talking to the server.
-  get_config(&config);
+  get_config(context, &config);
   // we don't want the camera sharing any thread info, because it'll
   // be running system etc, and that seems to screw with the threads.
   if (!fork()) {
