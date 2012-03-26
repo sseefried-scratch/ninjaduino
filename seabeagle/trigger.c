@@ -191,8 +191,13 @@ int create_triggerconfig(triggerconfig_t * conf,
 
   conf->trigger_name = zmsg_popstr(rule_details);
   conf->target_worker = zmsg_popstr(rule_details);
-  conf->auth = zmsg_pop(rule_details); // msgpack packed.
-  conf->addins = zmsg_pop(rule_details); // msgpack packed
+  // testing - can we treat these as strings?
+  conf->auth = zmsg_popstr(rule_details); // msgpack packed.
+  conf->addins = zmsg_popstr(rule_details); // msgpack packed
+
+
+  //  conf->auth = zmsg_pop(rule_details); // msgpack packed.
+  //  conf->addins = zmsg_pop(rule_details); // msgpack packed
   return 0;
 }
 

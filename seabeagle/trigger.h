@@ -8,8 +8,10 @@ typedef struct {
   char * rule_id;
   char * trigger_name;
   char * target_worker;
-  zframe_t * auth;
-  zframe_t * addins;
+  //experiment
+  char * auth;  char * addins;
+
+  //zframe_t * auth;  zframe_t * addins;
   
 } triggerconfig_t;
 typedef struct {

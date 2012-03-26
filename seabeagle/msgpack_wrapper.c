@@ -2,11 +2,11 @@
 #include <msgpack.h>
 #include <czmq.h>
 msgpack_object * parse_msgpack(msgpack_zone * mempool,
-                               zframe_t * frame) {
+                               char * frame) {
   msgpack_object * deserialised = malloc(sizeof(msgpack_object));
 
-  msgpack_unpack (zframe_data(frame), 
-                  zframe_size(frame),
+  msgpack_unpack (frame, 
+                  strlen(frame),
                   NULL, mempool, deserialised); 
   return deserialised;
 }
