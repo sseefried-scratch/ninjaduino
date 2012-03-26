@@ -184,14 +184,16 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
   char * tail = NULL;
   sqlite3 *db = init_db(servicename);
   sqlite3_stmt * insert_stmt;
+  zclock_log("%s worker preparing rules...", servicename);
   sqlite3_prepare_v2(db, "insert into rules VALUES (@RULEID, @TRIGGER_NAME, @TARGET_WORKER, @AUTH, @ADDINS);", 512, &insert_stmt, NULL);
-
+  zclock_log("%s worker reloading rules...", servicename);
   reload_rules(context, db, servicename, rules);
-
+  zclock_log("%s worker connecting...", servicename);
   mdwrk_t *session = mdwrk_new (config->base_config->broker_endpoint, servicename, 0);
   zclock_log("%s worker connected!", servicename);
 
   while (1) {
+    zclock_log("%s worker waiting for work.", servicename);
     zmsg_t *request = mdwrk_recv (session, &reply);
 
     if (request == NULL)
