@@ -209,18 +209,12 @@ void trigger(void *cvoid,
   char * user_id = "17"; 
   // TODO get broker in somehow
   char * broker = "tcp://au.ninjablocks.com:5773";
-  // char * channel = c->channel;
+
   mdcli_t * client = mdcli_new(broker, 1); //VERBOSE
-  //  triggertype_t trigger_type;
-  // sort out comms with the overlord
 
   triggermemory_t trigger_memory;
-  // thisi might be a ninjablock+service combo, as in "n:1234:relay",
-  // or a software service, as in "twitter"
-  
-
   msgpack_object * addins_obj = parse_msgpack(&mempool, c->addins);
-  // triggerfunction * trigger_function = new_trigger(addins);
+
   if(!parse_addins(addins_obj, &trigger_memory)) {
     //bad message
     zclock_log("bad trigger definition");
@@ -251,7 +245,7 @@ void trigger(void *cvoid,
 
   zsockopt_set_unsubscribe(line, "");
   zsockopt_set_subscribe(line, "VALUE");
-  send_sync("ok", control);
+  send_sync("pong", control);
   
   zmq_pollitem_t items [] = {
     { line, 0, ZMQ_POLLIN, 0 },
