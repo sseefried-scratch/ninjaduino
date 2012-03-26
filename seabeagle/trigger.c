@@ -20,9 +20,11 @@ send to "service_name"
 
 
 
-/* int trigger_fired(triggermemory_t *m, triggertype_t * ttype, char * value){ */
-  
-/* } */
+void init_memory(triggermemory_t * mem, int trigger, int reset) {
+  mem->trigger_level = trigger;
+  mem->reset_level=reset;
+  mem->ready = 1;
+}
 
 // what do we expect to get out of addins?
 //   line_id is mandatory
@@ -170,6 +172,14 @@ triggerfunction find_trigger(char * channel, char * triggername){
       return &falls_below;
     }
     if (strcmp("light_level_rises_above", triggername) == 0) {
+      return &rises_above;
+    }
+  } 
+  else if(strcmp("distance", channel) == 0) {
+    if(strcmp("distance_falls_below", triggername) == 0) {
+      return &falls_below;
+    }
+    if(strcmp("distance_rises_above", triggername) == 0) {
       return &rises_above;
     }
   }

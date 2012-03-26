@@ -1,12 +1,10 @@
 #include "trigger.h"
-main() {
-  triggerfunction tf = find_trigger("light", "light_level_falls_below");
-  assert(tf!=NULL);
+
+void acts_like_falls_below(triggerfunction tf) {
   triggermemory_t mem;
-  // default setup
-  mem.trigger_level = 100;
-  mem.reset_level = 400;
-  mem.ready = 1;
+  assert(tf!=NULL);
+  init_memory(&mem, 100, 400);
+
   int result;
 
   result = tf(&mem, 200);
@@ -19,4 +17,33 @@ main() {
   assert(!result);
   result = tf(&mem, 100);
   assert(result);
+}
+
+void acts_like_rises_above(triggerfunction tf) {
+  triggermemory_t mem;
+  assert(tf!=NULL);
+  init_memory(&mem, 300, 100);
+
+  int result;
+
+  result = tf(&mem, 200);
+  assert(!result);
+  result = tf(&mem, 300);
+  assert(result);
+  result = tf(&mem, 300);
+  assert(!result);
+  result = tf(&mem, 50);
+  assert(!result);
+  result = tf(&mem, 300);
+  assert(result);
+}
+
+
+int test_trigger() {
+  acts_like_falls_below(find_trigger("light", "light_level_falls_below"));
+  acts_like_rises_above(find_trigger("light", "light_level_rises_above"));
+
+  acts_like_falls_below(find_trigger("distance", "distance_falls_below"));
+  acts_like_rises_above(find_trigger("distance", "distance_rises_above"));
+  return 0;
 }
