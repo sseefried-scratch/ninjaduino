@@ -59,9 +59,9 @@ int config_callback(void *cvoid, int argc, char **argv, char **column){
     return 1;
   }
   fprintf(stderr, "argc is %d\n", argc);
-  config->identity = argv[0];
-  config->broker_endpoint = argv[1];
-  config->portwatcher_endpoint = argv[2];
+  config->identity = strdup(argv[0]);
+  config->broker_endpoint = strdup(argv[1]);
+  config->portwatcher_endpoint = strdup(argv[2]);
   return 0;
 }
 
@@ -101,8 +101,8 @@ int get_config(config_t * config) {
   }
 
   fprintf(stderr, "rc is %d\n", rc);
-  printf("identity is %s\n", config->identity);
-  printf("broker is  %s\n", config->broker_endpoint);
-  printf("port watcher is at %s\n", config->portwatcher_endpoint);
+  printf("identity is |%s|\n", config->identity);
+  printf("broker is  |%s|\n", config->broker_endpoint);
+  printf("port watcher is at |%s|\n", config->portwatcher_endpoint);
   return 0;
 }
