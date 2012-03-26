@@ -35,7 +35,7 @@ test_trigger: test_trigger.o trigger.o mdcliapi2.o msgpack_wrapper.o utils.o
 #	-lczmq 
 
 seabeagle: $(OBJS)
-	gcc -o seabeagle $(OBJS) -lzmq -lczmq -lmsgpack
+	gcc -o seabeagle $(OBJS) -lzmq -lczmq -lmsgpack -lsqlite3
 
 clean:
 	$(RM) *.o *~ $(MAIN)

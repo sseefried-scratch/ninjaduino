@@ -16,21 +16,11 @@
 
 int main() {
   config_t config;
-  if(!parse_config(&config)) {
-    fprintf(stderr, "bad config\n");
-    exit(1);
-  }
-
-
-  
-  printf("identity is %s\n", config.identity);
-  printf("broker is  %s\n", config.broker_endpoint);
-  printf("port watcher is at %s\n", config.portwatcher_endpoint);
 
   zctx_t * context = zctx_new();
-  // NOT YET TODO
-  //  config.identity = get_identity(context, &config);
-
+  // let's assume the magical code fairies Do The Right Thing
+  // in terms of talking to the server.
+  get_config(&config);
   // we don't want the camera sharing any thread info, because it'll
   // be running system etc, and that seems to screw with the threads.
   if (!fork()) {
