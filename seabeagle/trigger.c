@@ -245,7 +245,7 @@ void trigger(void *cvoid,
   // what line are we on?
   // this comes in the addins. 
   char * linesocket = to_linesocket(trigger_memory.line_id);
-  zclock_log("trigger is listening on %s", linesocket);
+  zclock_log("trigger is connecting to listen on %s", linesocket);
   zsocket_connect(line, linesocket);
 
   zsockopt_set_unsubscribe(line, "");

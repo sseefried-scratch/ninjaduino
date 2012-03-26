@@ -73,7 +73,7 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   
   void * lineout = zsocket_new(context, ZMQ_PUB);
   char * outpipe = to_linesocket(config->line_id);
-
+  zclock_log("binding line |%s|", outpipe);
   zsocket_bind(lineout, outpipe);
 
   void * subscriber = zsocket_new(context, ZMQ_SUB);
