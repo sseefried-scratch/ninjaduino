@@ -33,11 +33,15 @@ int main() {
    *  these separately
    */
   serialconfig_t t = { stdin };
+  zclock_log("Starting serial relay");
   void * serial_pipe = zthread_fork(context, &read_serial, &t);
   parent_handshake(serial_pipe);
+  zclock_log("Started serial relay!");
+
+  zclock_log("Starting line dispatcher");
   void * filter_pipe = zthread_fork(context, line_dispatcher, NULL);
   parent_handshake(filter_pipe);
-
+  zclock_log("Started line dispatcher");
   // separate worker threads
   zclock_log("starting workers");
 
