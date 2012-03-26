@@ -142,9 +142,10 @@ int load_rule(void *rvoid, int argc, char ** argv,  char ** column) {
   }
   rulepackage_t * rpkg = (rulepackage_t *) rvoid;
   triggerconfig_t * tconf = malloc(sizeof(triggerconfig_t));
-  tconf->rule_id = argv[0];
-  tconf->trigger_name = argv[1];
-  tconf->target_worker = argv[2];
+  tconf->rule_id       = strdup(argv[0]);
+  tconf->trigger_name  = strdup(argv[1]);
+  tconf->target_worker = strdup(argv[2]);
+  // FIXME auth and addins are blobs. how do we pull them out?
 
   create_trigger(rpkg->rules, argv[0], rpkg->context, tconf);
 }
