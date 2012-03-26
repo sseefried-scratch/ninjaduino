@@ -4,6 +4,8 @@
 #include <string.h>
 #include <assert.h>
 #include <sqlite3.h>
+#include <czmq.h>
+
 char * after_colon(char * buf) {
   while(*buf) {
     if(*buf == ':')  {
