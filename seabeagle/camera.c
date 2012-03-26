@@ -17,7 +17,7 @@ void camera(config_t * config) {
   char workername[512];
   void * data = malloc(2000000); // 2 mb enough?
   sprintf(workername, "%s:camera", config->identity);
-  zclock_log("worker %s trying to connect!", workername);
+
 
   zmsg_t *reply = NULL;
   while(1) {
@@ -26,12 +26,14 @@ void camera(config_t * config) {
       sleep(1);
     }
     // camera is now connected
+    zclock_log("worker %s trying to connect!", workername);
     mdwrk_t * session = mdwrk_new (config->broker_endpoint, workername, 0);    
 
     while(camera_connected()) {
       
       zmsg_t *request = mdwrk_recv (session, &reply);
       if (request == NULL) {
+        zclock_log("camera worker %s interrupted!", workername);
         mdwrk_destroy(&session);
         break;
       }
@@ -58,6 +60,7 @@ void camera(config_t * config) {
       zmsg_pushmem(reply, data, bytes_read);
       zmsg_destroy(&request);
     }
+    zmsg_destroy(&reply); // just in case
     reply = NULL;
     mdwrk_destroy (&session);
     zmsg_destroy(&reply);
