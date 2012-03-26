@@ -60,6 +60,7 @@ void camera(config_t * config) {
     }
     reply = NULL;
     mdwrk_destroy (&session);
+    zmsg_destroy(&reply);
     zclock_log("camera became unavailable");
   }
 }
