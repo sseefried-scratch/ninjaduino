@@ -225,8 +225,8 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
           sqlite3_bind_text(insert_stmt, 1, tconf->rule_id, -1, SQLITE_TRANSIENT);
           sqlite3_bind_text(insert_stmt, 2, tconf->trigger_name, -1, SQLITE_TRANSIENT);
           sqlite3_bind_text(insert_stmt, 3, tconf->target_worker, -1, SQLITE_TRANSIENT);
-          sqlite3_bind_blob(insert_stmt, 4, zframe_data(tconf->auth), zframe_size(tconf->auth), SQLITE_TRANSIENT);
-          sqlite3_bind_blob(insert_stmt, 5, zframe_data(tconf->addins), zframe_size(tconf->addins), SQLITE_TRANSIENT);
+          sqlite3_bind_text(insert_stmt, 4, tconf->auth, -1, SQLITE_TRANSIENT);
+          sqlite3_bind_text(insert_stmt, 5, tconf->addins, -1, SQLITE_TRANSIENT);
           sqlite3_step(insert_stmt);
           sqlite3_clear_bindings(insert_stmt);
           sqlite3_reset(insert_stmt);
