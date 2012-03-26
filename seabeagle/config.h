@@ -8,5 +8,6 @@ typedef struct {
   // void * context;
   
 } config_t;
-int parse_config(config_t * config) ;
+
+int get_config(config_t * config);
 #endif
