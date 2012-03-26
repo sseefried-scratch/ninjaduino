@@ -5,6 +5,12 @@
 
 typedef struct {
   char * channel;
+  char * rule_id;
+  char * trigger_name;
+  char * target_worker;
+  zframe_t * auth;
+  zframe_t * addins;
+  
 } triggerconfig_t;
 typedef struct {
   int ready;
@@ -13,7 +19,10 @@ typedef struct {
   int line_id;
 } triggermemory_t;
 
-
+int create_triggerconfig(triggerconfig_t * conf,
+                         zmsg_t * rule_details,
+                         char * channel,
+                         char * rule_id);
 
 /* typedef struct { */
 /*   char * trigger_name; */

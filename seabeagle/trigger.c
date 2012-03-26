@@ -29,7 +29,7 @@ send to "service_name"
 //   trigger_level is optional
 //   reset_level is optional
 //   anything else is ignored.
-int parse_trigger(msgpack_object * addins_obj, triggermemory_t * target) {
+int parse_addins(msgpack_object * addins_obj, triggermemory_t * target) {
   msgpack_object_print(stdout, *addins_obj);
   if (addins_obj->type != MSGPACK_OBJECT_MAP) {
     zclock_log("expected a hash at the top level, got %d",
@@ -176,10 +176,30 @@ triggerfunction find_trigger(char * channel, char * triggername){
   return NULL;
 }
 
+int create_triggerconfig(triggerconfig_t * conf,
+                         zmsg_t * rule_details,
+                         char * channel,
+                         char * rule_id) {
+  if(zmsg_size(rule_details) !=4) {
+    zclock_log("bad rule");
+    zmsg_dump(rule_details);
+    return 1;
+  }
+
+  conf->rule_id = rule_id;
+  conf->channel = channel;
+
+  conf->trigger_name = zmsg_popstr(rule_details);
+  conf->target_worker = zmsg_popstr(rule_details);
+  conf->auth = zmsg_pop(rule_details); // msgpack packed.
+  conf->addins = zmsg_pop(rule_details); // msgpack packed
+  return 0;
+}
+
 void trigger(void *cvoid, 
              zctx_t * context, 
              void * control) {
-  triggerconfig_t * config = (triggerconfig_t*) cvoid;
+  triggerconfig_t * c = (triggerconfig_t*) cvoid;
   //set up msgpack stuff
   zclock_log("watch_port started!");
   msgpack_zone mempool;
@@ -189,25 +209,19 @@ void trigger(void *cvoid,
   char * user_id = "17"; 
   // TODO get broker in somehow
   char * broker = "tcp://au.ninjablocks.com:5773";
-  char * channel = config->channel;
+  // char * channel = c->channel;
   mdcli_t * client = mdcli_new(broker, 1); //VERBOSE
   //  triggertype_t trigger_type;
   // sort out comms with the overlord
-  zmsg_t * rule_details = zmsg_recv(control);
-  assert(zmsg_size(rule_details) == 5);
-  char * rule_id = zmsg_popstr(rule_details);
-  char * trigger_name = zmsg_popstr(rule_details);
+
   triggermemory_t trigger_memory;
   // thisi might be a ninjablock+service combo, as in "n:1234:relay",
   // or a software service, as in "twitter"
-  char * target_worker = zmsg_popstr(rule_details);
-  char * auth = zmsg_popstr(rule_details); // msgpack packed.
   
-  zframe_t * addins = zmsg_pop(rule_details); // msgpack packed
-  zmsg_destroy(&rule_details);
-  msgpack_object * addins_obj = parse_msgpack(&mempool, addins);
+
+  msgpack_object * addins_obj = parse_msgpack(&mempool, c->addins);
   // triggerfunction * trigger_function = new_trigger(addins);
-  if(!parse_trigger(addins_obj, &trigger_memory)) {
+  if(!parse_addins(addins_obj, &trigger_memory)) {
     //bad message
     zclock_log("bad trigger definition");
     msgpack_object_print(stdout, *addins_obj);
@@ -215,13 +229,13 @@ void trigger(void *cvoid,
     return;
   }
   zclock_log("Creating trigger: target %s, rule_id %s, name %s", 
-             target_worker, rule_id, trigger_name);
+             c->target_worker, c->rule_id, c->trigger_name);
   dump_trigger(&trigger_memory);
   triggerfunction trigger_func;
-  if(!(trigger_func = find_trigger(channel, trigger_name))) {
+  if(!(trigger_func = find_trigger(c->channel, c->trigger_name))) {
 
     zclock_log("no trigger found for channel %s, trigger %s",
-               channel, trigger_name);
+               c->channel, c->trigger_name);
     send_sync("no such trigger", control);
     return;
   }
@@ -246,6 +260,27 @@ void trigger(void *cvoid,
   while(1) {
     // listen on control and line
     zmq_poll (items, 2, -1);
+    if (items[1].revents & ZMQ_POLLIN) {
+      zclock_log("rule %s received message on control pipe", c->rule_id);
+      // control message
+      // really only expecting DESTROY
+      zmsg_t * msg = zmsg_recv(control);
+      char * str = zmsg_popstr(msg);
+      zmsg_destroy(&msg);
+      
+      if (strcmp("Destroy", str) == 0) {
+        zclock_log("rule %s will quit on request", c->rule_id);
+        free(str);
+        send_sync("ok", control);
+        zclock_log("rule %s quitting on request", c->rule_id);
+        break;
+      } else  {
+        zclock_log("unexpected command %s for rule %s", str, c->rule_id);
+        free(str);
+        send_sync("ok", control);
+      }
+    }
+
     if (items[0].revents & ZMQ_POLLIN) {
       // serial update
       zmsg_t * msg = zmsg_recv(line);
@@ -255,10 +290,10 @@ void trigger(void *cvoid,
         // must have been dormant to have gotten this
         char * new_channel = zmsg_popstr(msg);
 
-        if(strcmp(channel, new_channel) == 0) {
+        if(strcmp(c->channel, new_channel) == 0) {
         // oh, happy day! We're relevant again.
         // reactivate and start looking at reset levels.
-          zclock_log("line %d: changed channel from %s to %s: trigger coming back to life", trigger_memory.line_id, channel, new_channel);
+          zclock_log("line %d: changed channel from %s to %s: trigger coming back to life", trigger_memory.line_id, c->channel, new_channel);
           zsockopt_set_subscribe(line, "VALUE");
           zsockopt_set_unsubscribe(line, "CHANNEL_CHANGE");
         }
@@ -269,18 +304,18 @@ void trigger(void *cvoid,
         memcpy(&value, zframe_data(vframe), sizeof(int));
         char * update_channel = zmsg_popstr(msg);
 
-        if(strcmp(channel, update_channel) != 0) {
+        if(strcmp(c->channel, update_channel) != 0) {
           // channel changed,  go dormant
           // this is legit according to my tests at
           // https://gist.github.com/2042350
 
-          zclock_log("line %d: changed channel from %s to %s: trigger going dormant", trigger_memory.line_id, channel, update_channel);
+          zclock_log("line %d: changed channel from %s to %s: trigger going dormant", trigger_memory.line_id, c->channel, update_channel);
           zsockopt_set_subscribe(line, "CHANNEL_CHANGE");
           zsockopt_set_unsubscribe(line, "VALUE");
         } 
         
         else if(trigger_func(&trigger_memory, value)) {
-          send_trigger(client, target_worker, rule_id, value, user_id);
+          send_trigger(client, c->target_worker, c->rule_id, value, user_id);
         }           
 
         free(update_channel);
@@ -290,26 +325,6 @@ void trigger(void *cvoid,
       }
       zmsg_destroy(&msg);
       zframe_destroy(&cmd);
-    }
-    if (items[1].revents & ZMQ_POLLIN) {
-      zclock_log("rule %s received message on control pipe", rule_id);
-      // control message
-      // really only expecting DESTROY
-      zmsg_t * msg = zmsg_recv(control);
-      char * str = zmsg_popstr(msg);
-      zmsg_destroy(&msg);
-      
-      if (strcmp("Destroy", str) == 0) {
-        zclock_log("rule %s will quit on request", rule_id);
-        free(str);
-        send_sync("ok", control);
-        zclock_log("rule %s quitting on request", rule_id);
-        break;
-      } else  {
-        zclock_log("unexpected command %s for rule %s", str, rule_id);
-        free(str);
-        send_sync("ok", control);
-      }
     }
     
   }

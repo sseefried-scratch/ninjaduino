@@ -107,24 +107,22 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
 
         zmsg_pushstr(reply, "duplicate");
       } else {
-        // start a new rule thread
-        zmsg_pushstr(request, rule_id);
         triggerconfig_t * tconf = malloc(sizeof(triggerconfig_t));
-        tconf->channel = channel;
+        create_triggerconfig(tconf, request, channel, rule_id);
+
         rule_pipe = zthread_fork(context, trigger, tconf);
-        zmsg_send(&request, rule_pipe);
-
+        send_sync("ping", rule_pipe);
         char * pipe_resp = zstr_recv(rule_pipe);
-        zmsg_pushstr(reply, pipe_resp);
 
-        if(strcmp(pipe_resp, "ok") == 0) {
+
+        if(strcmp(pipe_resp, "pong") == 0) {
           zhash_insert(rules, rule_id, rule_pipe);
+          zmsg_pushstr(reply, "ok");
         } else {
           zclock_log("something went wrong creating a trigger: %s", pipe_resp);
+          zmsg_pushstr(reply, pipe_resp);
         }
         free(pipe_resp);
-        zmsg_destroy(&request);
-
       }
     } else if (strcmp(command,"RemoveRule") == 0) {
 
@@ -136,13 +134,12 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         recv_sync("ok", rule_pipe);
         zsocket_destroy(context, rule_pipe);
         zhash_delete(rules, rule_id);
-        zmsg_destroy(&request);
+        zmsg_pushstr(reply, "ok");
         zclock_log("rule %s completely destroyed", rule_id);
       } else {
         // not there!
         zclock_log("Received delete trigger request for nonexistent rule %s, ignoring", rule_id);
         zmsg_pushstr(reply, "rule not found");
-        zmsg_destroy(&request);
       }
     } else if (strcmp(command, "AddMonitor")==0) {
       // unconditionally fork a monitor for each line
@@ -159,13 +156,11 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
         recv_sync("pong", monitor_pipe);
         zsocket_destroy(context, monitor_pipe);
       }
-      
+      zmsg_pushstr(reply, "ok");
     } else {
       zclock_log("Can't handle command %s: ignoring", command);
     }
-    zmsg_pushstr(reply, "ok");
     zmsg_destroy(&request);
-
   }
   mdwrk_destroy (&session);
   return;
