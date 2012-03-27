@@ -12,7 +12,8 @@ char * after_colon(char * buf) {
       buf++;
       while(*buf == ' ') buf++;
       char * tmpbuf = buf;
-      while(*tmpbuf!='\n') tmpbuf++;
+      while(*tmpbuf && *tmpbuf!='\n') tmpbuf++;
+      
       *tmpbuf='\0';
       return buf;
     }
@@ -41,7 +42,6 @@ int parse_config(config_t * config, FILE * c) {
       config->portwatcher_endpoint = strdup(after_colon(buf));
     } else if (strncmp("identity:", buf, 9) == 0) {
       config->identity = strdup(after_colon(buf));
-
     } else {
       fprintf(stderr, "bad line: %s\n", buf);
       free(buf);
