@@ -3,33 +3,22 @@ SRCS = filter.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.c worke
 
 TESTSRCS=test_trigger.c test_config.c
 TESTOBJS = $(TESTSRCS:.c=.o)
-# define the C object files 
-#
-# This uses Suffix Replacement within a macro:
-#   $(name:string1=string2)
-#         For each word in 'name' replace 'string1' with 'string2'
-# Below we are replacing the suffix .c of all words in the macro SRCS
-# with the .o suffix
-#
+
 OBJS = $(SRCS:.c=.o)
-#CFLAGS=-std=c99
-CFLAGS=-g -Wall
+CFLAGS=-g -Wall -std=c99
 LDFLAGS=-lzmq -lczmq -lmsgpack -lsqlite3
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
-%.o : %.c
-	$(COMPILE.c)  -MD -o $@ $<
-	  @cp $*.d $*.P; \
-            sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
-                -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $*.P; \
-            rm -f $*.d
+# i have absolutely no idea what this does...
+# %.o : %.c
+# 	$(COMPILE.c)  -MD -o $@ $<
+# 	  @cp $*.d $*.P; \
+#             sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+#                 -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $*.P; \
+#             rm -f $*.d
 
 all:  seabeagle
-
-# test_filter: test_filter.o filter.o cJSON.o line.o
-#	gcc -o test_filter filter.o test_filter.o cJSON.o line.o -lzmq
-#	-lczmq 
 
 seabeagle: $(OBJS) main.o
 	gcc -o seabeagle main.o $(OBJS) $(LDFLAGS)
