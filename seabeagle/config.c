@@ -68,6 +68,16 @@ int config_callback(void *cvoid, int argc, char **argv, char **column){
   return 0;
 }
 
+int retrieve_config(sqlite3 *db, config_t * config) {
+  int rc;
+  char * zErrMsg;
+  rc = sqlite3_exec(db, "select identity,broker,portwatcher from config", config_callback, config, &zErrMsg);
+  if(rc!=0) {
+    zclock_log("couldn't write to db, giving up: errno %d, msg %s", rc, zErrMsg);
+    return 1;
+  }
+  return 0;
+}
 int record_config(sqlite3 * db, config_t * config) {
     // put it back in!
     char sqlbuf[2048];
@@ -83,6 +93,16 @@ int record_config(sqlite3 * db, config_t * config) {
     }
 }
 
+int create_db(sqlite3 * db) {
+  char * zErrMsg;
+  int rc = sqlite3_exec(db, "create table if not exists config (identity string, broker string, portwatcher string);", NULL, NULL, &zErrMsg);
+  if (rc!=0) {
+    zclock_log("couldn't create db tables, giving up: errno %d, msg %s", rc, zErrMsg);
+  } else {
+    return 0;
+  }
+}
+
 int get_config(zctx_t * context, config_t * config) {
   sqlite3 *db;
   char *zErrMsg = 0;
@@ -94,12 +114,9 @@ int get_config(zctx_t * context, config_t * config) {
     sqlite3_close(db);
     return 1;
   }
-  rc = sqlite3_exec(db, "create table if not exists config (identity string, broker string, portwatcher string);\
-                         select identity,broker,portwatcher from config", config_callback, config, &zErrMsg);
-  if(rc!=0) {
-    zclock_log("couldn't write to db, giving up: errno %d, msg %s", rc, zErrMsg);
-    return 1;
-  }
+  create_db(db);
+  retrieve_config(db, config);
+
   // Our only piece of local configuration outside the database is the 
   // block registrar. First thing we do is to connect to it, possibly
   // with the identity pulled from the db, and confirm/get a new id.
