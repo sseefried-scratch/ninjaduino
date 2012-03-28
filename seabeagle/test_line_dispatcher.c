@@ -15,7 +15,7 @@ int test_line_dispatcher() {
 
   zclock_log("pre-fork");
   void * pipe = zthread_fork(context, line_dispatcher, NULL);
-  // temp
+  // temp - a race condition here?? FIX
   sleep(1);
   zclock_log("post-fork");
   zclock_log("parent handshake...");

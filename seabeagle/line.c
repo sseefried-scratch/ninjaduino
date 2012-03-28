@@ -81,8 +81,10 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
   zsockopt_set_unsubscribe(subscriber, "");
 
   char * topic = to_line(config->line_id);
-  // 
+
   zsockopt_set_subscribe(subscriber, topic);
+  zsockopt_set_subscribe(subscriber, "DESTROY"); // listen for
+                                                 // shutdown message.
   zclock_log("subscribing to literal line |%s|", topic);
   zsocket_connect(subscriber, "inproc://line");
 
@@ -98,6 +100,13 @@ void line_listener(void * cvoid, zctx_t * context, void * pipe) {
         
     // zmsg_dump(msg);
     char * recv_topic = zmsg_popstr(msg);
+    if (strcmp("DESTROY", recv_topic) == 0) {
+      // shutdown
+      
+      // TODO free memory.
+      return;
+    }
+
     // zclock_log("line got topic\nreceived: %s\nexpected: %s\n", recv_topic, config->topic);
     //fflush(stdout);
     assert(strcmp(recv_topic, topic)==0);

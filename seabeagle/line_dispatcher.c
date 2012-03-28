@@ -43,6 +43,8 @@ void line_dispatcher(void * cvoid, zctx_t * context, void * pipe) {
       char * cmd = zstr_recv(pipe);
       if (strcmp(cmd, "DESTROY") == 0) {
         zclock_log("shutting down line dispatcher");
+        // should also shut down clients
+        zstr_send(events, "DESTROY");
         zstr_send(pipe, "OK");
         free(cmd);
         break;
