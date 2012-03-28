@@ -1,7 +1,7 @@
 # define the C source files
-SRCS = filter.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.c worker.c mdwrkapi.c camera.c msgpack_wrapper.c mdcliapi2.c identity.c config.c
+SRCS = line_dispatcher.c serial_relay.c cJSON.c line.c  monitor.c trigger.c utils.c worker.c mdwrkapi.c camera.c msgpack_wrapper.c mdcliapi2.c identity.c config.c
 
-TESTSRCS=test_trigger.c test_config.c
+TESTSRCS=test_trigger.c test_config.c test_line_dispatcher.c test_json.c
 TESTOBJS = $(TESTSRCS:.c=.o)
 
 OBJS = $(SRCS:.c=.o)

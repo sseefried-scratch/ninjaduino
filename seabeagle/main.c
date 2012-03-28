@@ -6,13 +6,16 @@
 // #include <sys/wait.h>
 // #include <stdio.h>
 #include "config.h"
-#include "filter.h"
+#include "line_dispatcher.h"
+#include "line.h"
 #include "utils.h"
 #include "worker.h"
 #include "worker_config.h"
 #include "camera.h"
 #include "identity.h"
 
+int LINES = 4;
+void * lines[4];
 
 int main() {
   config_t config;
@@ -42,20 +45,31 @@ int main() {
   void * filter_pipe = zthread_fork(context, line_dispatcher, NULL);
   parent_handshake(filter_pipe);
   zclock_log("Started line dispatcher");
+
+  // start all the line listener threads
+  int i;
+  for(i=0; i<LINES;i++) {
+    // line listener owns the config
+    zclock_log("filter: starting line listener on port %d\n", i);
+    lineconfig_t * lineconfig = malloc(sizeof(lineconfig_t));
+    lineconfig->line_id = i+1; // lines start at 1
+    lines[i] = zthread_fork(context, line_listener, (void*)lineconfig);
+    parent_handshake(lines[i]);
+  }
+
+
   // separate worker threads
   zclock_log("starting workers");
-
-
 
   // we also start workers for the analog lines. These are easy to
   // monitor, we can just pass a channel name.
   char * internal_channels[3] = { "distance", "light", "button" };
-  int i;
+
   for(i=0;i<3;i++) {
     workerconfig_t * wconf = malloc(sizeof(workerconfig_t));
     wconf->base_config = &config;
     wconf->channel = internal_channels[i];
-    parent_handshake(zthread_fork(context, generic_worker, (void*) wconf));    
+    parent_handshake(zthread_fork(context, generic_worker, (void*) wconf));
   }
 
   // FIX We have to wait for the child threads to finish, but this

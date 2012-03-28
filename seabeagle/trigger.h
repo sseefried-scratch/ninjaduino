@@ -45,4 +45,5 @@ triggerfunction find_trigger(char * channel, char * triggername);
 void trigger(void *config, 
              zctx_t * context, 
              void * pipe );
+
 #endif

@@ -149,8 +149,11 @@ int load_rule(void *rvoid, int argc, char ** argv,  char ** column) {
   tconf->auth          = strdup(argv[3]);
   tconf->addins        = strdup(argv[4]);
   tconf->channel       = strdup(rpkg->channel);
-  // FIXME auth and addins are blobs. how do we pull them out?
 
+  // this is a bit dodgy. we shouldn't really be creating triggers
+  // from anywhere: we don't know that everything is in position to
+  // receive triggers. should probably be sending this down the same
+  // pipe that gets external requests.
   create_trigger(rpkg->rules, argv[0], rpkg->context, tconf);
 }
 
@@ -223,6 +226,10 @@ void generic_worker(void * cvoid, zctx_t * context, void * pipe) {
       } else {
         triggerconfig_t * tconf = malloc(sizeof(triggerconfig_t));
         create_triggerconfig(tconf, request, channel, rule_id);
+
+        // when we create this trigger, what guarantee do we have that
+        // the line listener is active? FIX
+        // basically we have none. crap.
         char * created = create_trigger(rules, rule_id, context, tconf);
         if(NULL == created) {
           // happy path, so add to db
